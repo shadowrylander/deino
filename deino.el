@@ -167,6 +167,26 @@ warn: keep KEYMAP and issue a warning instead of running the command."
         (setq deino-curr-on-exit nil)
         (funcall on-exit)))))
 
+(defun deino-force-disable ()
+    "Disable the current deino."
+    (interactive)
+    (setq deino-deactivate nil)
+    (remove-hook 'pre-command-hook 'deino--clearfun)
+    (if (fboundp 'remove-function)
+        (remove-function input-method-function #'deino--imf)
+        (when deino--input-method-function
+        (setq input-method-function deino--input-method-function)
+        (setq deino--input-method-function nil)))
+    (dolist (frame (frame-list))
+        (with-selected-frame frame
+        (when overriding-terminal-local-map
+            (internal-pop-keymap deino-curr-map 'overriding-terminal-local-map))))
+    (setq deino-curr-map nil)
+    (when deino-curr-on-exit
+      (let ((on-exit deino-curr-on-exit))
+        (setq deino-curr-on-exit nil)
+        (funcall on-exit))))
+
 (unless (fboundp 'internal-push-keymap)
   (defun internal-push-keymap (keymap symbol)
     (let ((map (symbol-value symbol)))
