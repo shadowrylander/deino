@@ -374,6 +374,7 @@ Exitable only through a blue head.")
 (defvar deino-base-map
   (let ((map (make-sparse-keymap)))
     (define-key map [?\C-u] 'deino--universal-argument)
+    (define-key map [?~] 'deino--universal-argument)
     (define-key map [?-] 'deino--negative-argument)
     (define-key map [?0] 'deino--digit-argument)
     (define-key map [?1] 'deino--digit-argument)
