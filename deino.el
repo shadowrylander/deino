@@ -85,6 +85,8 @@
 (require 'ring)
 (require 'meq)
 
+(defvar deino-enabled-temporarily nil)
+
 (defvar deino-curr-map nil
   "The keymap of the current deino called.")
 
@@ -1272,8 +1274,7 @@ Cancel the previous `deino-timeout'."
   (timer-activate deino-timeout-timer))
 
 ;;* Macros
-;;;###autoload
-(defmacro defdeino (name body &optional docstring &rest heads)
+(defmacro deino--defdeino (name body &optional docstring &rest heads)
   "Create a deino - a family of functions with prefix NAME.
 
 NAME should be a symbol, it will be the prefix of all functions
@@ -1490,7 +1491,7 @@ result of `defdeino'."
      (deino--complain "Error in defdeino %S: %s" name (cdr err))
      nil)))
 
-(defmacro defdeino+ (name body &optional docstring &rest heads)
+(defmacro deino--defdeino+ (name body &optional docstring &rest heads)
   "Redefine an existing deino by adding new heads.
 Arguments are same as of `defdeino'."
   (declare (indent defun) (doc-string 3))
@@ -1504,6 +1505,31 @@ Arguments are same as of `defdeino'."
         (append (deino--prop name "/heads") heads)
         :key #'car
         :test #'equal)))
+
+(defmacro deino--defdeinos (plus name body &optional docstring &rest heads)
+  (let* ((split-body (-partition-before-pred #'keywordp body))
+          (new-body (--drop-while (or (-contains? it :color) (-all? #'stringp it)) split-body))
+          (deino-funk (intern (concat "deino--defdeino" (when plus "+")))))
+    (push '(:color blue) new-body)
+    (eval `(,deino-funk ,(intern (concat (symbol-name name) "-usually")) ,body ,docstring ,@heads))
+    (eval `(,deino-funk
+      ,(intern (concat (symbol-name name) "-temporarily"))
+      ,(-flatten-n 1 new-body)
+      ,docstring
+      ,@heads))
+    `(defun ,(intern (concat (symbol-name name) "/body")) nil (interactive)
+      (if (not deino-enabled-temporarily)
+        (,(intern (concat (symbol-name name) "-usually/body")))
+        (setq deino-enabled-temporarily nil)
+        (,(intern (concat (symbol-name name) "-temporarily/body")))))))
+
+;;;###autoload
+(defmacro defdeino (name body &optional docstring &rest heads)
+  `(deino--defdeinos nil ,name ,body ,docstring ,@heads))
+
+;;;###autoload
+(defmacro defdeino+ (name body &optional docstring &rest heads)
+  `(deino--defdeinos t ,name ,body ,docstring ,@heads))
 
 (defun deino--prop (name prop-name)
   (symbol-value (intern (concat (symbol-name name) prop-name))))
