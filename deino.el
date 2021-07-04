@@ -1509,19 +1509,26 @@ Arguments are same as of `defdeino'."
 (defmacro deino--defdeinos (plus name body &optional docstring &rest heads)
   (let* ((split-body (-partition-before-pred #'keywordp body))
           (new-body (--drop-while (or (-contains? it :color) (-all? #'stringp it)) split-body))
-          (deino-funk (intern (concat "deino--defdeino" (when plus "+")))))
+          (deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
+          (nname (replace-regexp-in-string
+            "-temporarily"
+            ""
+            (replace-regexp-in-string
+              "-usually"
+              ""
+              (symbol-name name)))))
     (push '(:color blue) new-body)
-    (eval `(,deino-funk ,(intern (concat (symbol-name name) "-usually")) ,body ,docstring ,@heads))
+    (eval `(,deino-funk ,(intern (concat nname "-usually")) ,body ,docstring ,@heads))
     (eval `(,deino-funk
-      ,(intern (concat (symbol-name name) "-temporarily"))
+      ,(intern (concat nname "-temporarily"))
       ,(-flatten-n 1 new-body)
       ,docstring
       ,@heads))
-    `(defun ,(intern (concat (symbol-name name) "/body")) nil (interactive)
+    `(defun ,(intern (concat nname "/body")) nil (interactive)
       (if (not deino-enabled-temporarily)
-        (,(intern (concat (symbol-name name) "-usually/body")))
+        (,(intern (concat nname "-usually/body")))
         (setq deino-enabled-temporarily nil)
-        (,(intern (concat (symbol-name name) "-temporarily/body")))))))
+        (,(intern (concat nname "-temporarily/body")))))))
 
 ;;;###autoload
 (defmacro defdeino (name body &optional docstring &rest heads)
