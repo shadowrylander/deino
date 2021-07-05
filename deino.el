@@ -84,6 +84,7 @@
 (require 'lv)
 (require 'ring)
 (require 'meq)
+(require 'janus)
 
 (defvar deino-enabled-temporarily nil)
 
