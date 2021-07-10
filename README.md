@@ -14,8 +14,8 @@ bindings with a common prefix - a deino.
 Once you summon the deino through the prefixed binding (the body + any one head), all heads can be
 called in succession with only a short extension.
 
-The deino is vanquished once Hercules, any binding that isn't the deino's head, arrives.  Note that
-Hercules, besides vanquishing the deino, will still serve his original purpose, calling his proper
+The deino is vanquished once cosmoem, any binding that isn't the deino's head, arrives.  Note that
+cosmoem, besides vanquishing the deino, will still serve his original purpose, calling his proper
 command.  This makes the deino very seamless, it's like a minor mode that disables itself
 auto-magically.
 

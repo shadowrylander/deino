@@ -31,8 +31,8 @@
 ;;
 ;; Once you summon the deino (through the prefixed binding), all the
 ;; heads can be called in succession with only a short extension.
-;; The deino is vanquished once Hercules, any binding that isn't the
-;; deino's head, arrives.  Note that Hercules, besides vanquishing the
+;; The deino is vanquished once cosmoem, any binding that isn't the
+;; deino's head, arrives.  Note that cosmoem, besides vanquishing the
 ;; deino, will still serve his original purpose, calling his proper
 ;; command.  This makes the deino very seamless, it's like a minor
 ;; mode that disables itself automagically.
@@ -952,7 +952,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        ,doc
        (interactive)
        (require 'deino)
-       (when (meq/any-popup-showing-p) (meq/which-key--hide-popup))
+       (when (any-popup-showing-p) (meq/which-key--hide-popup))
        (deino-default-pre)
        ,@(when body-pre (list body-pre))
        ,@(cond ((eq (deino--head-property head :exit) t)
