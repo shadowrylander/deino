@@ -1517,10 +1517,13 @@ Arguments are same as of `defdeino'."
               "-usually"
               ""
               (symbol-name name))))
-          (new-heads (mapc #'(lambda (head) (interactive)
+          (new-heads (mapcar #'(lambda (head) (interactive)
             (if (member :color head)
-              (setf (nth (1+ (seq-position head :color))) 'blue)
-              (append '(:color blue) head))) heads)))
+              (let ((newhead (cl-copy-list head)))
+                (setf (nth (1+ (seq-position newhead :color)) newhead) 'blue)
+                newhead)
+              ;; (append head '(:color blue))
+              head)) heads)))
     (eval `(,deino-funk ,(intern (concat nname "-usually")) ,body ,docstring ,@heads))
     (eval `(,deino-funk
       ,(intern (concat nname "-temporarily"))
