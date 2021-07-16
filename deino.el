@@ -1500,31 +1500,33 @@ Arguments are same as of `defdeino'."
     (setq heads
           (cons docstring heads))
     (setq docstring nil))
-  `(defdeino ,name ,(or body (deino--prop name "/params"))
-     ,(or docstring (deino--prop name "/docstring"))
-     ,@(cl-delete-duplicates
+  `(defdeino ,name
+      (,@body ,@(deino--prop name "/params"))
+      ,(or docstring (deino--prop name "/docstring"))
+      ,@(cl-delete-duplicates
         (append (deino--prop name "/heads") heads)
         :key #'car
         :test #'equal)))
 
 (defmacro deino--defdeinos (plus name body &optional docstring &rest heads)
-  (let* ((split-body (-partition-before-pred #'keywordp body))
-          (new-body (--drop-while (or (-contains? it :color) (-all? #'stringp it)) split-body))
-          (deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
+  (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
           (nname (replace-regexp-in-string
             "-temporarily"
             ""
             (replace-regexp-in-string
               "-usually"
               ""
-              (symbol-name name)))))
-    (push '(:color blue) new-body)
+              (symbol-name name))))
+          (new-heads (mapc #'(lambda (head) (interactive)
+            (if (member :color head)
+              (setf (nth (1+ (seq-position head :color))) 'blue)
+              (append '(:color blue) head))) heads)))
     (eval `(,deino-funk ,(intern (concat nname "-usually")) ,body ,docstring ,@heads))
     (eval `(,deino-funk
       ,(intern (concat nname "-temporarily"))
-      ,(-flatten-n 1 new-body)
+      ,body
       ,docstring
-      ,@heads))
+      ,@new-heads))
     `(defun ,(intern (concat nname "/body")) nil (interactive)
       (if (not deino-enabled-temporarily)
         (,(intern (concat nname "-usually/body")))
