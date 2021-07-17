@@ -1500,34 +1500,49 @@ Arguments are same as of `defdeino'."
     (setq heads
           (cons docstring heads))
     (setq docstring nil))
-  `(defdeino ,name
-      (,@body ,@(deino--prop name "/params"))
+  (let* ((split-body (-partition-before-pred #'keywordp body))
+          (preface (--filter (-all? #'stringp it) split-body))
+          (keyword-body (-flatten-n 1 (if
+            (and (= (length split-body) 1) (not preface))
+            (car split-body)
+            (cdr split-body))))
+          (previous-body (deino--prop name "/params"))
+          (previous-split-body (-partition-before-pred #'keywordp previous-body))
+          (previous-keyword-body (-flatten-n 1 (if
+            (and (= (length previous-split-body) 1) (not (--filter (-all? #'stringp it) previous-split-body)))
+            (car previous-split-body)
+            (cdr previous-split-body))))
+          (all-keywords (-filter #'keywordp (append keyword-body previous-keyword-body)))
+          (new-keyword-body (-flatten-n 1 (mapcar #'(lambda (keyword*) (interactive)
+            `(,keyword* ,(cl-getf keyword-body keyword* (cl-getf previous-keyword-body keyword*)))) all-keywords))))
+    `(deino--defdeino ,name
+      (,@preface ,@new-keyword-body)
       ,(or docstring (deino--prop name "/docstring"))
       ,@(cl-delete-duplicates
         (append (deino--prop name "/heads") heads)
         :key #'car
-        :test #'equal)))
+        :test #'equal))))
+
+(defun deino--remove-color (head)
+  (let* ((split-head (-partition-before-pred #'keywordp head))
+        (preface (car split-head))
+        (keywords (unless (= (length split-head) 1) (-flatten-n 1 (cdr split-head)))))
+  (when (cl-getf keywords :color)
+    (cl-remf keywords :color))
+  `(,@preface ,@keywords :color blue)))
 
 (defmacro deino--defdeinos (plus name body &optional docstring &rest heads)
   (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
-          (nname (replace-regexp-in-string
-            "-temporarily"
-            ""
-            (replace-regexp-in-string
-              "-usually"
-              ""
-              (symbol-name name))))
-          (new-heads (mapcar #'(lambda (head) (interactive)
-            (if (member :color head)
-              (let ((newhead (cl-copy-list head)))
-                (setf (nth (1+ (seq-position newhead :color)) newhead) 'blue)
-                newhead)
-              (append head '(:color blue)))) heads)))
+          (nname (symbol-name name))
+          (new-heads (mapcar #'deino--remove-color heads))
+          (new-docstring (when docstring (if (stringp docstring)
+                                          docstring
+                                          (deino--remove-color docstring)))))
     (eval `(,deino-funk ,(intern (concat nname "-usually")) ,body ,docstring ,@heads))
     (eval `(,deino-funk
       ,(intern (concat nname "-temporarily"))
       ,body
-      ,docstring
+      ,new-docstring
       ,@new-heads))
     `(defun ,(intern (concat nname "/body")) nil (interactive)
       (if (not deino-enabled-temporarily)
