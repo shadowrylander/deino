@@ -1522,8 +1522,7 @@ Arguments are same as of `defdeino'."
               (let ((newhead (cl-copy-list head)))
                 (setf (nth (1+ (seq-position newhead :color)) newhead) 'blue)
                 newhead)
-              ;; (append head '(:color blue))
-              head)) heads)))
+              (append head '(:color blue)))) heads)))
     (eval `(,deino-funk ,(intern (concat nname "-usually")) ,body ,docstring ,@heads))
     (eval `(,deino-funk
       ,(intern (concat nname "-temporarily"))
