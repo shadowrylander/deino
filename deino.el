@@ -1524,26 +1524,34 @@ Arguments are same as of `defdeino'."
         :test #'equal))))
 
 (defun deino--remove-color (head)
-  (let* ((split-head (-partition-before-pred #'keywordp head))
+  (if (meq/listtp head) (let* ((split-head (-partition-before-pred #'keywordp head))
         (preface (car split-head))
         (keywords (unless (= (length split-head) 1) (-flatten-n 1 (cdr split-head)))))
   (when (cl-getf keywords :color)
     (cl-remf keywords :color))
-  `(,@preface ,@keywords :color blue)))
+  `(,@preface ,@keywords :color blue)) head))
+
+(defun deino--remove-color-of-deino (head)
+  (if (and
+        (meq/listtp head)
+        (symbolp (nth 1 head))
+        (meq/substring "/body" (symbol-name (nth 1 head))))
+    (deino--remove-color head)
+    head))
 
 (defmacro deino--defdeinos (plus name body &optional docstring &rest heads)
   (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
-          (nname (symbol-name name))
-          (new-heads (mapcar #'deino--remove-color heads))
-          (new-docstring (when docstring (if (stringp docstring)
-                                          docstring
-                                          (deino--remove-color docstring)))))
-    (eval `(,deino-funk ,(intern (concat nname "-usually")) ,body ,docstring ,@heads))
+          (nname (symbol-name name)))
+    (eval `(,deino-funk
+      ,(intern (concat nname "-usually"))
+      ,body
+      ,(deino--remove-color-of-deino docstring)
+      ,@(mapcar #'deino--remove-color-of-deino heads)))
     (eval `(,deino-funk
       ,(intern (concat nname "-temporarily"))
       ,body
-      ,new-docstring
-      ,@new-heads))
+      ,(deino--remove-color docstring)
+      ,@(mapcar #'deino--remove-color heads)))
     `(defun ,(intern (concat nname "/body")) nil (interactive)
       (if (not deino-enabled-temporarily)
         (,(intern (concat nname "-usually/body")))
