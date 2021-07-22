@@ -890,6 +890,25 @@ Set `this-command' to NAME."
          (deino--call-interactively-remap-maybe #',cmd))
     `(deino--call-interactively-remap-maybe #',cmd)))
 
+(defun deino--defun-pre-pre-default nil (interactive)
+  (when (any-popup-showing-p) (meq/which-key--hide-popup))
+  (when (meq/exwm-p) (setq meq/var/last-exwm-mode exwm--input-mode)
+                    (exwm-input-grab-keyboard exwm--id)))
+
+(defun deino--defun-pre-post-default nil (interactive))
+
+(defun deino--defun-post-exit-pre-command nil (interactive)
+  (when (meq/exwm-p) (cl-case meq/var/last-exwm-mode
+    (line-mode (exwm-input-grab-keyboard exwm--id))
+    (char-mode (exwm-input-release-keyboard exwm--id)))))
+
+(defun deino--defun-post-exit-post-command nil (interactive)
+  (unless deino-curr-map (meq/which-key--show-popup)))
+
+(defun deino--defun-post-nil-pre-command nil (interactive))
+
+(defun deino--defun-post-nil-post-command nil (interactive))
+
 (defun deino--make-defun (name body doc head
                           keymap body-pre body-before-exit
                           &optional body-after-exit)
@@ -918,6 +937,9 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
          (body-on-exit-t
           `((deino-keyboard-quit)
             (setq deino-curr-body-fn ',curr-body-fn-sym)
+
+            (deino--defun-post-exit-pre-command)
+
             ,@(if body-after-exit
                   `((unwind-protect
                          ,(when cmd
@@ -926,19 +948,16 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                 (when cmd
                   `(,(deino--call-interactively cmd (cadr head)))))
 
-            ;; My stuff for when exiting a deino
-            (unless deino-curr-map (meq/which-key--show-popup))
-            (when (meq/exwm-p) (cl-case meq/var/last-exwm-mode
-              (line-mode (exwm-input-grab-keyboard))
-              (char-mode (exwm-input-release-keyboard))))
-
-            ))
+            (deino--defun-postexit-post-command)))
          (body-on-exit-nil
           (delq
            nil
            `((let ((deino--ignore ,(not (eq (cadr head) 'body))))
                (deino-keyboard-quit)
                (setq deino-curr-body-fn ',curr-body-fn-sym))
+
+              (deino--defun-post-nil-pre-command)
+
              ,(when cmd
                 `(condition-case err
                      ,(deino--call-interactively cmd (cadr head))
@@ -954,18 +973,16 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                  (list 'quote body-foreign-keys)))
              ,body-after-exit
              ,(when body-timeout
-                `(deino-timeout ,body-timeout))))))
+                `(deino-timeout ,body-timeout))
+
+              (deino--defun-post-nil-post-command)))))
     `(defun ,cmd-name ()
        ,doc
        (interactive)
        (require 'deino)
-
-       ;; My stuff for when entering a deino
-       (when (any-popup-showing-p) (meq/which-key--hide-popup))
-       (when (meq/exwm-p) (setq meq/var/last-exwm-mode exwm--input-mode)
-                          (exwm-input-grab-keyboard))
-
+       (deino--defun-pre-pre-default)
        (deino-default-pre)
+       (deino--defun-pre-post-default)
        ,@(when body-pre (list body-pre))
        ,@(cond ((eq (deino--head-property head :exit) t)
                 body-on-exit-t)
