@@ -925,7 +925,14 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                       ,body-after-exit))
                 (when cmd
                   `(,(deino--call-interactively cmd (cadr head)))))
-            (unless deino-curr-map (meq/which-key--show-popup))))
+
+            ;; My stuff for when exiting a deino
+            (unless deino-curr-map (meq/which-key--show-popup))
+            (when (meq/exwm-p) (cl-case meq/var/last-exwm-mode
+              (line-mode (exwm-input-grab-keyboard))
+              (char-mode (exwm-input-release-keyboard))))
+
+            ))
          (body-on-exit-nil
           (delq
            nil
@@ -952,7 +959,12 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        ,doc
        (interactive)
        (require 'deino)
+
+       ;; My stuff for when entering a deino
        (when (any-popup-showing-p) (meq/which-key--hide-popup))
+       (when (meq/exwm-p) (setq meq/var/last-exwm-mode exwm--input-mode)
+                          (exwm-input-grab-keyboard))
+
        (deino-default-pre)
        ,@(when body-pre (list body-pre))
        ,@(cond ((eq (deino--head-property head :exit) t)
