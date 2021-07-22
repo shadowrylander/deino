@@ -948,7 +948,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                 (when cmd
                   `(,(deino--call-interactively cmd (cadr head)))))
 
-            (deino--defun-postexit-post-command)))
+            (deino--defun-post-exit-post-command)))
          (body-on-exit-nil
           (delq
            nil
