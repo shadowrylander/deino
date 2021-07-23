@@ -476,19 +476,14 @@ When ARG is non-nil, use that instead."
   "Generate a callable symbol from X.
 If X is a function symbol or a lambda, return it.  Otherwise, it
 should be a single statement.  Wrap it in an interactive lambda."
-  (cond ((or (symbolp x) (functionp x)) (when x `(lambda nil (interactive)
-                                          (deino--make-callable-pre-command)
-                                          (,x)
-                                          (deino--make-callable-post-command))))
+  (cond ((or (symbolp x) (functionp x))
+         x)
         ((and (consp x) (eq (car x) 'function))
-         `(lambda nil (interactive)
-            (deino--make-callable-pre-command)
-            (,(cadr x))
-            (deino--make-callable-post-command)))
-        (t `(lambda nil (interactive)
-            (deino--make-callable-pre-command)
-            ,x
-            (deino--make-callable-post-command)))))
+         (cadr x))
+        (t
+         `(lambda ()
+            (interactive)
+            ,x))))
 
 (defun deino-plist-get-default (plist prop default)
   "Extract a value from a property list.
