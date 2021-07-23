@@ -464,14 +464,6 @@ When ARG is non-nil, use that instead."
       (and (consp x)
            (memq (car x) '(function quote)))))
 
-(defun deino--make-callable-pre-command nil (interactive)
-  (when (meq/exwm-p) (cl-case meq/var/last-exwm-mode
-    (line-mode (exwm-input-grab-keyboard exwm--id))
-    (char-mode (exwm-input-release-keyboard exwm--id)))))
-
-(defun deino--make-callable-post-command nil (interactive)
-  (unless deino-curr-map (meq/which-key--show-popup)))
-
 (defun deino--make-callable (x)
   "Generate a callable symbol from X.
 If X is a function symbol or a lambda, return it.  Otherwise, it
@@ -884,9 +876,11 @@ Only when `deino-look-for-remap' is non nil."
   (let ((remapped-cmd (if deino-look-for-remap
                           (command-remapping `,cmd)
                         nil)))
+    (deino--defun-exit-t-pre-command)
     (if remapped-cmd
         (call-interactively `,remapped-cmd)
-      (call-interactively `,cmd))))
+      (call-interactively `,cmd))
+    (deino--defun-exit-t-post-command)))
 
 (defun deino--call-interactively (cmd name)
   "Generate a `call-interactively' statement for CMD.
@@ -904,6 +898,17 @@ Set `this-command' to NAME."
                     (exwm-input-grab-keyboard exwm--id)))
 
 (defun deino--defun-pre-post-default nil (interactive))
+
+(defun deino--defun-exit-t-pre-command nil (interactive)
+  (when (meq/exwm-p) (cl-case meq/var/last-exwm-mode
+    (line-mode (exwm-input-grab-keyboard exwm--id))
+    (char-mode (exwm-input-release-keyboard exwm--id)))))
+
+(defun deino--defun-exit-t-post-command nil (interactive)
+  (unless deino-curr-map (meq/which-key--show-popup)))
+
+(defun deino--defun-exit-nil-pre-command nil (interactive))
+(defun deino--defun-exit-nil-post-command nil (interactive))
 
 (defun deino--make-defun (name body doc head
                           keymap body-pre body-before-exit
