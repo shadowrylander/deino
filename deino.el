@@ -464,18 +464,31 @@ When ARG is non-nil, use that instead."
       (and (consp x)
            (memq (car x) '(function quote)))))
 
+(defun deino--make-callable-pre-command nil (interactive)
+  (when (meq/exwm-p) (cl-case meq/var/last-exwm-mode
+    (line-mode (exwm-input-grab-keyboard exwm--id))
+    (char-mode (exwm-input-release-keyboard exwm--id)))))
+
+(defun deino--make-callable-post-command nil (interactive)
+  (unless deino-curr-map (meq/which-key--show-popup)))
+
 (defun deino--make-callable (x)
   "Generate a callable symbol from X.
 If X is a function symbol or a lambda, return it.  Otherwise, it
 should be a single statement.  Wrap it in an interactive lambda."
-  (cond ((or (symbolp x) (functionp x))
-         x)
+  (cond ((or (symbolp x) (functionp x)) (when x `(lambda nil (interactive)
+                                          (deino--make-callable-pre-command)
+                                          (,x)
+                                          (deino--make-callable-post-command))))
         ((and (consp x) (eq (car x) 'function))
-         (cadr x))
-        (t
-         `(lambda ()
-            (interactive)
-            ,x))))
+         `(lambda nil (interactive)
+            (deino--make-callable-pre-command)
+            (,(cadr x))
+            (deino--make-callable-post-command)))
+        (t `(lambda nil (interactive)
+            (deino--make-callable-pre-command)
+            ,x
+            (deino--make-callable-post-command)))))
 
 (defun deino-plist-get-default (plist prop default)
   "Extract a value from a property list.
@@ -897,18 +910,6 @@ Set `this-command' to NAME."
 
 (defun deino--defun-pre-post-default nil (interactive))
 
-(defun deino--defun-post-exit-pre-command nil (interactive)
-  (when (meq/exwm-p) (cl-case meq/var/last-exwm-mode
-    (line-mode (exwm-input-grab-keyboard exwm--id))
-    (char-mode (exwm-input-release-keyboard exwm--id)))))
-
-(defun deino--defun-post-exit-post-command nil (interactive)
-  (unless deino-curr-map (meq/which-key--show-popup)))
-
-(defun deino--defun-post-nil-pre-command nil (interactive))
-
-(defun deino--defun-post-nil-post-command nil (interactive))
-
 (defun deino--make-defun (name body doc head
                           keymap body-pre body-before-exit
                           &optional body-after-exit)
@@ -937,27 +938,19 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
          (body-on-exit-t
           `((deino-keyboard-quit)
             (setq deino-curr-body-fn ',curr-body-fn-sym)
-
-            (deino--defun-post-exit-pre-command)
-
             ,@(if body-after-exit
                   `((unwind-protect
                          ,(when cmd
                             (deino--call-interactively cmd (cadr head)))
                       ,body-after-exit))
                 (when cmd
-                  `(,(deino--call-interactively cmd (cadr head)))))
-
-            (deino--defun-post-exit-post-command)))
+                  `(,(deino--call-interactively cmd (cadr head)))))))
          (body-on-exit-nil
           (delq
            nil
            `((let ((deino--ignore ,(not (eq (cadr head) 'body))))
                (deino-keyboard-quit)
                (setq deino-curr-body-fn ',curr-body-fn-sym))
-
-              (deino--defun-post-nil-pre-command)
-
              ,(when cmd
                 `(condition-case err
                      ,(deino--call-interactively cmd (cadr head))
@@ -973,9 +966,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                  (list 'quote body-foreign-keys)))
              ,body-after-exit
              ,(when body-timeout
-                `(deino-timeout ,body-timeout))
-
-              (deino--defun-post-nil-post-command)))))
+                `(deino-timeout ,body-timeout))))))
     `(defun ,cmd-name ()
        ,doc
        (interactive)
