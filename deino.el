@@ -876,11 +876,9 @@ Only when `deino-look-for-remap' is non nil."
   (let ((remapped-cmd (if deino-look-for-remap
                           (command-remapping `,cmd)
                         nil)))
-    (deino--defun-exit-t-pre-command)
     (if remapped-cmd
         (call-interactively `,remapped-cmd)
-      (call-interactively `,cmd))
-    (deino--defun-exit-t-post-command)))
+      (call-interactively `,cmd))))
 
 (defun deino--call-interactively (cmd name)
   "Generate a `call-interactively' statement for CMD.
@@ -895,14 +893,17 @@ Set `this-command' to NAME."
 (defun deino--defun-pre-pre-default nil (interactive)
   (when (any-popup-showing-p) (meq/which-key--hide-popup))
   (when (meq/exwm-p) (setq meq/var/last-exwm-mode exwm--input-mode)
-                    (exwm-input-grab-keyboard exwm--id)))
+                    ;; (exwm-input-grab-keyboard exwm--id)
+                    (setq exwm--input-mode 'line-mode)))
 
 (defun deino--defun-pre-post-default nil (interactive))
 
 (defun deino--defun-exit-t-pre-command nil (interactive)
-  (when (meq/exwm-p) (cl-case meq/var/last-exwm-mode
-    (line-mode (exwm-input-grab-keyboard exwm--id))
-    (char-mode (exwm-input-release-keyboard exwm--id)))))
+  (when (meq/exwm-p)
+    ;; (cl-case meq/var/last-exwm-mode
+    ;;   (line-mode (exwm-input-grab-keyboard exwm--id))
+    ;;   (char-mode (exwm-input-release-keyboard exwm--id)))
+      (setq exwm--input-mode meq/var/last-exwm-mode)))
 
 (defun deino--defun-exit-t-post-command nil (interactive)
   (unless deino-curr-map (meq/which-key--show-popup)))
@@ -936,7 +937,9 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                    (plist-get (nthcdr 3 head) :idle)))
          (curr-body-fn-sym (intern (format "%S/body" name)))
          (body-on-exit-t
-          `((deino-keyboard-quit)
+          `((deino--defun-exit-t-pre-command)
+
+            (deino-keyboard-quit)
             (setq deino-curr-body-fn ',curr-body-fn-sym)
             ,@(if body-after-exit
                   `((unwind-protect
@@ -944,11 +947,15 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                             (deino--call-interactively cmd (cadr head)))
                       ,body-after-exit))
                 (when cmd
-                  `(,(deino--call-interactively cmd (cadr head)))))))
+                  `(,(deino--call-interactively cmd (cadr head)))))
+                  
+          (deino--defun-exit-t-post-command)))
          (body-on-exit-nil
           (delq
            nil
-           `((let ((deino--ignore ,(not (eq (cadr head) 'body))))
+           `((deino--defun-exit-nil-pre-command)
+
+             (let ((deino--ignore ,(not (eq (cadr head) 'body))))
                (deino-keyboard-quit)
                (setq deino-curr-body-fn ',curr-body-fn-sym))
              ,(when cmd
@@ -966,14 +973,20 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                  (list 'quote body-foreign-keys)))
              ,body-after-exit
              ,(when body-timeout
-                `(deino-timeout ,body-timeout))))))
-    `(defun ,cmd-name ()
+                `(deino-timeout ,body-timeout))
+                
+            (deino--defun-exit-nil-post-command)))))
+    `(defun ,cmd-name nil
        ,doc
        (interactive)
        (require 'deino)
+
        (deino--defun-pre-pre-default)
+
        (deino-default-pre)
+
        (deino--defun-pre-post-default)
+
        ,@(when body-pre (list body-pre))
        ,@(cond ((eq (deino--head-property head :exit) t)
                 body-on-exit-t)
