@@ -891,11 +891,9 @@ Set `this-command' to NAME."
     `(deino--call-interactively-remap-maybe #',cmd)))
 
 (defun deino--defun-pre-pre-default nil (interactive)
-  (when (any-popup-showing-p) (meq/which-key--hide-popup))
-  (when (meq/exwm-p) (exwm-input-grab-keyboard exwm--id)))
+  (when (any-popup-showing-p) (meq/which-key--hide-popup)))
 (defun deino--defun-pre-post-default nil (interactive))
-(defun deino--defun-exit-t-pre-command nil (interactive)
-  (when (meq/exwm-p) (exwm-input-release-keyboard exwm--id)))
+(defun deino--defun-exit-t-pre-command nil (interactive))
 (defun deino--defun-exit-t-post-command nil (interactive)
   (unless deino-curr-map (meq/which-key--show-popup)))
 (defun deino--defun-exit-nil-pre-command nil (interactive))
