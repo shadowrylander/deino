@@ -892,24 +892,16 @@ Set `this-command' to NAME."
 
 (defun deino--defun-pre-pre-default nil (interactive)
   (when (any-popup-showing-p) (meq/which-key--hide-popup))
-  (when (meq/exwm-p) (setq meq/var/last-exwm-mode exwm--input-mode)
-                    ;; (exwm-input-grab-keyboard exwm--id)
-                    (setq exwm--input-mode 'line-mode)))
-
+  (when (meq/exwm-p) (exwm-input-grab-keyboard exwm--id)))
 (defun deino--defun-pre-post-default nil (interactive))
-
 (defun deino--defun-exit-t-pre-command nil (interactive)
-  (when (meq/exwm-p)
-    ;; (cl-case meq/var/last-exwm-mode
-    ;;   (line-mode (exwm-input-grab-keyboard exwm--id))
-    ;;   (char-mode (exwm-input-release-keyboard exwm--id)))
-      (setq exwm--input-mode meq/var/last-exwm-mode)))
-
+  (when (meq/exwm-p) (exwm-input-release-keyboard exwm--id)))
 (defun deino--defun-exit-t-post-command nil (interactive)
   (unless deino-curr-map (meq/which-key--show-popup)))
-
 (defun deino--defun-exit-nil-pre-command nil (interactive))
 (defun deino--defun-exit-nil-post-command nil (interactive))
+(defun deino--defun-exit-both-pre-command nil (interactive))
+(defun deino--defun-exit-both-post-command nil (interactive))
 
 (defun deino--make-defun (name body doc head
                           keymap body-pre body-before-exit
@@ -938,6 +930,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
          (curr-body-fn-sym (intern (format "%S/body" name)))
          (body-on-exit-t
           `((deino--defun-exit-t-pre-command)
+            (deino--defun-exit-both-pre-command)
 
             (deino-keyboard-quit)
             (setq deino-curr-body-fn ',curr-body-fn-sym)
@@ -949,11 +942,13 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                 (when cmd
                   `(,(deino--call-interactively cmd (cadr head)))))
                   
-          (deino--defun-exit-t-post-command)))
+          (deino--defun-exit-t-post-command)
+          (deino--defun-exit-both-post-command)))
          (body-on-exit-nil
           (delq
            nil
            `((deino--defun-exit-nil-pre-command)
+             (deino--defun-exit-both-pre-command)
 
              (let ((deino--ignore ,(not (eq (cadr head) 'body))))
                (deino-keyboard-quit)
@@ -974,8 +969,9 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
              ,body-after-exit
              ,(when body-timeout
                 `(deino-timeout ,body-timeout))
-                
-            (deino--defun-exit-nil-post-command)))))
+
+            (deino--defun-exit-nil-post-command)
+            (deino--defun-exit-both-post-command)))))
     `(defun ,cmd-name nil
        ,doc
        (interactive)
