@@ -1566,9 +1566,16 @@ Arguments are same as of `defdeino'."
     (deino--remove-color head)
     head))
 
-(defmacro deino--defdeinos (plus name body &optional docstring &rest heads)
+(defmacro deino--defdeinos (plus name body ryo-key &optional docstring &rest heads)
   (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
-          (nname (symbol-name name)))
+          (nname (symbol-name name))
+          (actual-ryo-key (when ryo-key (if (stringp ryo-key) ryo-key (car ryo-key))))
+          (rest-of-ryo-key (when ryo-key (unless (stringp ryo-key) (cdr ryo-key))))
+          (func `(defun ,(intern (concat nname "/body")) nil (interactive)
+                  (if (not deino-enabled-temporarily)
+                    (,(intern (concat nname "-usually/body")))
+                    (setq deino-enabled-temporarily nil)
+                    (,(intern (concat nname "-temporarily/body")))))))
     (eval `(,deino-funk
       ,(intern (concat nname "-usually"))
       ,body
@@ -1579,19 +1586,19 @@ Arguments are same as of `defdeino'."
       ,body
       ,(deino--remove-color docstring)
       ,@(mapcar #'deino--remove-color heads)))
-    `(defun ,(intern (concat nname "/body")) nil (interactive)
-      (if (not deino-enabled-temporarily)
-        (,(intern (concat nname "-usually/body")))
-        (setq deino-enabled-temporarily nil)
-        (,(intern (concat nname "-temporarily/body")))))))
+    (eval func)
+    (when ryo-key
+      (with-eval-after-load 'ryo-modal
+        (eval `(ryo-modal-key ,actual-ryo-key ',(intern (concat nname "/body")) :name ,nname ,@rest-of-ryo-key))))
+    func))
 
 ;;;###autoload
-(defmacro defdeino (name body &optional docstring &rest heads)
-  `(deino--defdeinos nil ,name ,body ,docstring ,@heads))
+(defmacro defdeino (name body ryo-key &optional docstring &rest heads)
+  `(deino--defdeinos nil ,name ,body ,ryo-key ,docstring ,@heads))
 
 ;;;###autoload
 (defmacro defdeino+ (name body &optional docstring &rest heads)
-  `(deino--defdeinos t ,name ,body ,docstring ,@heads))
+  `(deino--defdeinos t ,name ,body nil ,docstring ,@heads))
 
 (defun deino--prop (name prop-name)
   (symbol-value (intern (concat (symbol-name name) prop-name))))
