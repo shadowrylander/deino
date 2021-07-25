@@ -91,7 +91,9 @@
   (";" . "sc")
   ("'" . "apos")
   ("\"" . "quotes")
-  ("\\" . "bs")))
+  ("\\" . "bs")
+  ("," . "comma")
+  ("`" . "bts")))
 
 (defvar deino-enabled-temporarily nil)
 
@@ -1575,7 +1577,7 @@ Arguments are same as of `defdeino'."
 
 (defun deino--replace-key (key) (or (cdr (assoc key deino--key-replacements)) key))
 
-(defmacro deino--defdeinos (parent plus onname first-call last-step name body ryo-key &optional docstring &rest heads)
+(defmacro deino--defdeinos (parent plus onname first-call name body ryo-key &optional docstring &rest heads)
   (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
           (nname (symbol-name name))
           (func `(defun ,(intern (concat nname "/body")) nil (interactive)
@@ -1593,39 +1595,46 @@ Arguments are same as of `defdeino'."
       ,body
       ,(deino--remove-color docstring)
       ,@(mapcar #'deino--remove-color heads)))
-    (when (or last-step ryo-key)
+    (when ryo-key
       (let* ((nonname (if first-call nname onname))
-              (actual-ryo-key (when ryo-key (if (stringp ryo-key) ryo-key (car ryo-key))))
-              (rest-of-ryo-key (when ryo-key (unless (stringp ryo-key) (cdr ryo-key))))
-              (keys (when ryo-key (split-string actual-ryo-key " ")))
+              (actual-ryo-key (if (stringp ryo-key) ryo-key (car ryo-key)))
+              (rest-of-ryo-key (unless (stringp ryo-key) (cdr ryo-key)))
+              (keys (split-string actual-ryo-key " "))
               (one-key (= (length keys) 1))
+              (two-key (= (length keys) 2))
+              (next-keys (cdr keys))
               (fcok (and first-call one-key))
-              (next-ryo-key (unless last-step (string-join (cdr keys) " ")))
+
+              ;; VERY IMPORTANT! THIS IS THE STOP SCENARIO!
+              (next-ryo-key (unless two-key (string-join next-keys " ")))
+              
               (carkeys (car keys))
-              (next-keys (cadr keys))
+              (spare-keys (cadr keys))
               (current-parent (if parent
                                   (concat parent " " (deino--replace-key carkeys))
                                   (deino--replace-key carkeys)))
-              (next-parent (unless last-step (concat current-parent " " (deino--replace-key next-keys))))
-              (ryo-name (if (or fcok last-step)
-                          nonname
-                          (s-replace " " "-" (concat "ryo-deino-" current-parent))))
+              (next-parent (concat current-parent " " (deino--replace-key spare-keys)))
+              (ryo-name (if fcok nonname (s-replace " " "-" (concat "ryo-deino-" current-parent))))
               (ryo-body (intern (concat ryo-name "/body")))
-              (next-ryo-name (if last-step nonname (s-replace " " "-" (concat "ryo-deino-" next-parent))))
-              (next-deino-body (intern (concat (if last-step nonname next-ryo-name) "/body"))))
+              (next-ryo-name (if two-key
+                                nonname
+                                (s-chop-suffix "-" (s-replace " " "-" (concat "ryo-deino-" next-parent)))))
+              (next-deino-body (intern (concat next-ryo-name "/body"))))
           (if fcok
             (eval func)
             (eval `(deino--defdeinos
               ,current-parent
-              ,(fboundp next-deino-body)
+              ,(fboundp ryo-body)
               ,nonname
               nil
-              ,one-key
               ,(intern ryo-name)
               (:color blue)
               ,next-ryo-key
               ("`" nil "cancel")
-              (,next-keys ,next-deino-body ,next-ryo-name))))
+
+              ;; TODO
+              (,spare-keys ,next-deino-body ,next-ryo-name))))
+
           (when first-call (with-eval-after-load 'ryo-modal
             (eval `(ryo-modal-key
               ,carkeys
@@ -1636,11 +1645,11 @@ Arguments are same as of `defdeino'."
 
 ;;;###autoload
 (defmacro defdeino (name body ryo-key &optional docstring &rest heads)
-  `(deino--defdeinos nil nil nil t nil ,name ,body ,ryo-key ,docstring ,@heads))
+  `(deino--defdeinos nil nil nil t ,name ,body ,ryo-key ,docstring ,@heads))
 
 ;;;###autoload
 (defmacro defdeino+ (name body &optional docstring &rest heads)
-  `(deino--defdeinos nil t nil t nil ,name ,body nil ,docstring ,@heads))
+  `(deino--defdeinos nil t nil t ,name ,body nil ,docstring ,@heads))
 
 (defun deino--prop (name prop-name)
   (symbol-value (intern (concat (symbol-name name) prop-name))))
