@@ -85,6 +85,13 @@
 (require 'ring)
 (require 'meq)
 (require 'janus)
+(require 's)
+
+(defvar deino--key-replacements '(
+  (";" . "sc")
+  ("'" . "apos")
+  ("\"" . "quotes")
+  ("\\" . "bs")))
 
 (defvar deino-enabled-temporarily nil)
 
@@ -1566,11 +1573,11 @@ Arguments are same as of `defdeino'."
     (deino--remove-color head)
     head))
 
-(defmacro deino--defdeinos (plus name body ryo-key &optional docstring &rest heads)
+(defun deino--replace-key (key) (or (cdr (assoc key deino--key-replacements)) key))
+
+(defmacro deino--defdeinos (parent plus onname first-call last-step name body ryo-key &optional docstring &rest heads)
   (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
           (nname (symbol-name name))
-          (actual-ryo-key (when ryo-key (if (stringp ryo-key) ryo-key (car ryo-key))))
-          (rest-of-ryo-key (when ryo-key (unless (stringp ryo-key) (cdr ryo-key))))
           (func `(defun ,(intern (concat nname "/body")) nil (interactive)
                   (if (not deino-enabled-temporarily)
                     (,(intern (concat nname "-usually/body")))
@@ -1586,19 +1593,54 @@ Arguments are same as of `defdeino'."
       ,body
       ,(deino--remove-color docstring)
       ,@(mapcar #'deino--remove-color heads)))
-    (eval func)
-    (when ryo-key
-      (with-eval-after-load 'ryo-modal
-        (eval `(ryo-modal-key ,actual-ryo-key ',(intern (concat nname "/body")) :name ,nname ,@rest-of-ryo-key))))
+    (when (or last-step ryo-key)
+      (let* ((nonname (if first-call nname onname))
+              (actual-ryo-key (when ryo-key (if (stringp ryo-key) ryo-key (car ryo-key))))
+              (rest-of-ryo-key (when ryo-key (unless (stringp ryo-key) (cdr ryo-key))))
+              (keys (when ryo-key (split-string actual-ryo-key " ")))
+              (one-key (= (length keys) 1))
+              (fcok (and first-call one-key))
+              (next-ryo-key (unless last-step (string-join (cdr keys) " ")))
+              (carkeys (car keys))
+              (next-keys (cadr keys))
+              (current-parent (if parent
+                                  (concat parent " " (deino--replace-key carkeys))
+                                  (deino--replace-key carkeys)))
+              (next-parent (unless last-step (concat current-parent " " (deino--replace-key next-keys))))
+              (ryo-name (if (or fcok last-step)
+                          nonname
+                          (s-replace " " "-" (concat "ryo-deino-" current-parent))))
+              (ryo-body (intern (concat ryo-name "/body")))
+              (next-ryo-name (if last-step nonname (s-replace " " "-" (concat "ryo-deino-" next-parent))))
+              (next-deino-body (intern (concat (if last-step nonname next-ryo-name) "/body"))))
+          (if fcok
+            (eval func)
+            (eval `(deino--defdeinos
+              ,current-parent
+              ,(fboundp next-deino-body)
+              ,nonname
+              nil
+              ,one-key
+              ,(intern ryo-name)
+              (:color blue)
+              ,next-ryo-key
+              ("`" nil "cancel")
+              (,next-keys ,next-deino-body ,next-ryo-name))))
+          (when first-call (with-eval-after-load 'ryo-modal
+            (eval `(ryo-modal-key
+              ,carkeys
+              ',ryo-body
+              :name ,ryo-name
+              ,@rest-of-ryo-key))))))
     func))
 
 ;;;###autoload
 (defmacro defdeino (name body ryo-key &optional docstring &rest heads)
-  `(deino--defdeinos nil ,name ,body ,ryo-key ,docstring ,@heads))
+  `(deino--defdeinos nil nil nil t nil ,name ,body ,ryo-key ,docstring ,@heads))
 
 ;;;###autoload
 (defmacro defdeino+ (name body &optional docstring &rest heads)
-  `(deino--defdeinos t ,name ,body nil ,docstring ,@heads))
+  `(deino--defdeinos nil t nil t nil ,name ,body nil ,docstring ,@heads))
 
 (defun deino--prop (name prop-name)
   (symbol-value (intern (concat (symbol-name name) prop-name))))
