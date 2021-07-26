@@ -86,6 +86,7 @@
 (require 'meq)
 (require 'janus)
 (require 's)
+(require 'dash)
 
 (defvar deino--key-replacements '(
   (";" . "sc")
@@ -94,6 +95,8 @@
   ("\\" . "bs")
   ("," . "comma")
   ("`" . "bts")))
+
+(defvar deino--ryo-deino-alist nil)
 
 (defvar deino-enabled-temporarily nil)
 
@@ -1576,6 +1579,8 @@ Arguments are same as of `defdeino'."
     head))
 
 (defun deino--replace-key (key) (or (cdr (assoc key deino--key-replacements)) key))
+(defun deino--replace-spaces (str) (s-replace " " "-" str))
+(defun deino--construct-rdn (str) (deino--replace-spaces (concat "ryo-deino-" str)))
 
 (defmacro deino--defdeinos (parent plus onname first-call name body ryo-key &optional docstring &rest heads)
   (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
@@ -1602,39 +1607,38 @@ Arguments are same as of `defdeino'."
               (keys (split-string actual-ryo-key " "))
               (one-key (= (length keys) 1))
               (two-key (= (length keys) 2))
-              (next-keys (cdr keys))
-              (fcok (and first-call one-key))
-
-              ;; VERY IMPORTANT! THIS IS THE STOP SCENARIO!
-              (next-ryo-key (unless two-key (string-join next-keys " ")))
-              
+              (fcok (and first-call one-key))              
               (carkeys (car keys))
               (spare-keys (cadr keys))
               (current-parent (if parent
                                   (concat parent " " (deino--replace-key carkeys))
                                   (deino--replace-key carkeys)))
-              (next-parent (concat current-parent " " (deino--replace-key spare-keys)))
-              (ryo-name (if fcok nonname (s-replace " " "-" (concat "ryo-deino-" current-parent))))
+              (ryo-name (if fcok nonname (deino--construct-rdn current-parent)))
+              (ryo-keyword (intern (concat ":" ryo-name)))
+              (ryo-alist (cl-getf deino--ryo-deino-alist ryo-keyword))
               (ryo-body (intern (concat ryo-name "/body")))
+              (ryo-body-plus (fboundp ryo-body))
+
+              ;; VERY IMPORTANT! THIS IS THE STOP SCENARIO!
+              (next-ryo-key (unless two-key (string-join (cdr keys) " ")))
+
+              (next-parent (concat current-parent " " (deino--replace-key spare-keys)))
               (next-ryo-name (if two-key
                                 nonname
-                                (s-chop-suffix "-" (s-replace " " "-" (concat "ryo-deino-" next-parent)))))
+                                (s-chop-suffix "-" (deino--construct-rdn next-parent))))
               (next-deino-body (intern (concat next-ryo-name "/body"))))
           (if fcok
             (eval func)
             (eval `(deino--defdeinos
               ,current-parent
-              ,(fboundp ryo-body)
+              ,ryo-body-plus
               ,nonname
               nil
               ,(intern ryo-name)
               (:color blue)
               ,next-ryo-key
-              ("`" nil "cancel")
-
-              ;; TODO
+              ,(unless ryo-body-plus '("`" nil "cancel"))
               (,spare-keys ,next-deino-body ,next-ryo-name))))
-
           (when first-call (with-eval-after-load 'ryo-modal
             (eval `(ryo-modal-key
               ,carkeys
@@ -1650,6 +1654,16 @@ Arguments are same as of `defdeino'."
 ;;;###autoload
 (defmacro defdeino+ (name body &optional docstring &rest heads)
   `(deino--defdeinos nil t nil t ,name ,body nil ,docstring ,@heads))
+
+(defun deino--construct-rdn+ (keys) (deino--construct-rdn (string-join (mapcar #'deino--replace-key keys) " ")))
+
+;;;###autoload
+(defmacro defdeinor+ (key name)
+  (let* ((keys (split-string key " ")))
+    `(defdeino+
+      ,(intern (deino--construct-rdn+ (butlast keys)))
+      nil
+      (,(cadr keys) ,(intern (concat (deino--construct-rdn+ keys) "/body")) ,name))))
 
 (defun deino--prop (name prop-name)
   (symbol-value (intern (concat (symbol-name name) prop-name))))
