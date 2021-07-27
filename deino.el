@@ -902,12 +902,10 @@ Set `this-command' to NAME."
          (deino--call-interactively-remap-maybe #',cmd))
     `(deino--call-interactively-remap-maybe #',cmd)))
 
-(defun deino--defun-pre-pre-default nil (interactive)
-  (when (any-popup-showing-p) (meq/which-key--hide-popup)))
+(defun deino--defun-pre-pre-default nil (interactive))
 (defun deino--defun-pre-post-default nil (interactive))
 (defun deino--defun-exit-t-pre-command nil (interactive))
-(defun deino--defun-exit-t-post-command nil (interactive)
-  (unless deino-curr-map (meq/which-key--show-popup)))
+(defun deino--defun-exit-t-post-command nil (interactive))
 (defun deino--defun-exit-nil-pre-command nil (interactive))
 (defun deino--defun-exit-nil-post-command nil (interactive))
 (defun deino--defun-exit-both-pre-command nil (interactive))
@@ -1562,7 +1560,7 @@ Arguments are same as of `defdeino'."
         :key #'car
         :test #'equal))))
 
-(defun deino--remove-color (head)
+(defun deino--remove-color-of-head (head)
   (if (meq/listtp head) (let* ((split-head (-partition-before-pred #'keywordp head))
         (preface (car split-head))
         (keywords (unless (= (length split-head) 1) (-flatten-n 1 (cdr split-head)))))
@@ -1575,12 +1573,12 @@ Arguments are same as of `defdeino'."
         (meq/listtp head)
         (symbolp (nth 1 head))
         (meq/substring "/body" (symbol-name (nth 1 head))))
-    (deino--remove-color head)
+    (deino--remove-color-of-head head)
     head))
 
 (defun deino--replace-key (key) (or (cdr (assoc key deino--key-replacements)) key))
 (defun deino--replace-spaces (str) (s-replace " " "-" str))
-(defun deino--construct-rdn (str) (deino--replace-spaces (concat "ryo-deino-" str)))
+(defun deino--construct-rdn (str) (deino--replace-spaces (concat "ryo-deino--" str)))
 
 (defmacro deino--defdeinos (parent plus onname first-call name body ryo-key &optional docstring &rest heads)
   (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
@@ -1598,24 +1596,21 @@ Arguments are same as of `defdeino'."
     (eval `(,deino-funk
       ,(intern (concat nname "-temporarily"))
       ,body
-      ,(deino--remove-color docstring)
-      ,@(mapcar #'deino--remove-color heads)))
+      ,(deino--remove-color-of-head docstring)
+      ,@(mapcar #'deino--remove-color-of-head heads)))
     (when ryo-key
       (let* ((nonname (if first-call nname onname))
               (actual-ryo-key (if (stringp ryo-key) ryo-key (car ryo-key)))
               (rest-of-ryo-key (unless (stringp ryo-key) (cdr ryo-key)))
               (keys (split-string actual-ryo-key " "))
-              (one-key (= (length keys) 1))
               (two-key (= (length keys) 2))
-              (fcok (and first-call one-key))              
+              (fcok (and first-call (= (length keys) 1)))
               (carkeys (car keys))
               (spare-keys (cadr keys))
               (current-parent (if parent
                                   (concat parent " " (deino--replace-key carkeys))
                                   (deino--replace-key carkeys)))
               (ryo-name (if fcok nonname (deino--construct-rdn current-parent)))
-              (ryo-keyword (intern (concat ":" ryo-name)))
-              (ryo-alist (cl-getf deino--ryo-deino-alist ryo-keyword))
               (ryo-body (intern (concat ryo-name "/body")))
               (ryo-body-plus (fboundp ryo-body))
 
@@ -1637,7 +1632,11 @@ Arguments are same as of `defdeino'."
               ,(intern ryo-name)
               (:color blue)
               ,next-ryo-key
+
+              ;; TODO
               ,(unless ryo-body-plus '("`" nil "cancel"))
+              ;; ("`" nil "cancel")
+
               (,spare-keys ,next-deino-body ,next-ryo-name))))
           (when first-call (with-eval-after-load 'ryo-modal
             (eval `(ryo-modal-key
