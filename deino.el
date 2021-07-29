@@ -902,14 +902,14 @@ Set `this-command' to NAME."
          (deino--call-interactively-remap-maybe #',cmd))
     `(deino--call-interactively-remap-maybe #',cmd)))
 
-(defun deino--defun-pre-pre-default nil (interactive))
+(defun deino--defun-pre-pre-default nil (interactive) (meq/which-key--hide-popup))
 (defun deino--defun-pre-post-default nil (interactive))
 (defun deino--defun-exit-t-pre-command nil (interactive))
-(defun deino--defun-exit-t-post-command nil (interactive))
 (defun deino--defun-exit-nil-pre-command nil (interactive))
-(defun deino--defun-exit-nil-post-command nil (interactive))
 (defun deino--defun-exit-both-pre-command nil (interactive))
-(defun deino--defun-exit-both-post-command nil (interactive))
+(defun deino--defun-exit-post-command nil (interactive)
+  (unless deino-curr-map
+    (meq/which-key--show-popup meq/var/all-keymaps-map)))
 
 (defun deino--make-defun (name body doc head
                           keymap body-pre body-before-exit
@@ -948,10 +948,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                             (deino--call-interactively cmd (cadr head)))
                       ,body-after-exit))
                 (when cmd
-                  `(,(deino--call-interactively cmd (cadr head)))))
-                  
-          (deino--defun-exit-t-post-command)
-          (deino--defun-exit-both-post-command)))
+                  `(,(deino--call-interactively cmd (cadr head)))))))
          (body-on-exit-nil
           (delq
            nil
@@ -976,31 +973,30 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                  (list 'quote body-foreign-keys)))
              ,body-after-exit
              ,(when body-timeout
-                `(deino-timeout ,body-timeout))
+                `(deino-timeout ,body-timeout)))))
+         (func `(defun ,cmd-name nil
+                  ,doc
+                  (interactive)
+                  (require 'deino)
 
-            (deino--defun-exit-nil-post-command)
-            (deino--defun-exit-both-post-command)))))
-    `(defun ,cmd-name nil
-       ,doc
-       (interactive)
-       (require 'deino)
+                  (deino--defun-pre-pre-default)
 
-       (deino--defun-pre-pre-default)
+                  (deino-default-pre)
 
-       (deino-default-pre)
+                  (deino--defun-pre-post-default)
 
-       (deino--defun-pre-post-default)
-
-       ,@(when body-pre (list body-pre))
-       ,@(cond ((eq (deino--head-property head :exit) t)
-                body-on-exit-t)
-               ((eq (deino--head-property head :exit) nil)
-                body-on-exit-nil)
-               (t
-                `((if ,(deino--head-property head :exit)
-                      (progn
-                        ,@body-on-exit-t)
-                    ,@body-on-exit-nil)))))))
+                  ,@(when body-pre (list body-pre))
+                  ,@(cond ((eq (deino--head-property head :exit) t)
+                            body-on-exit-t)
+                          ((eq (deino--head-property head :exit) nil)
+                            body-on-exit-nil)
+                          (t
+                            `((if ,(deino--head-property head :exit)
+                                  (progn
+                                    ,@body-on-exit-t)
+                                ,@body-on-exit-nil)))))))
+    (advice-add (eval func) :after #'deino--defun-exit-post-command)
+    func))
 
 (defvar deino-props-alist nil)
 
