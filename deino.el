@@ -1671,15 +1671,18 @@ Arguments are same as of `defdeino'."
 (defmacro defdeino+ (name body &optional docstring &rest heads)
   `(deino--defdeinos nil t nil t ,name ,body nil ,docstring ,@heads))
 
-(defun deino--construct-rdn+ (keys) (deino--construct-rdn (string-join (mapcar #'deino--replace-key keys) " ")))
+(defun deino--construct-name+ (keys constructor) (funcall constructor (string-join (mapcar #'deino--replace-key keys) " ")))
+(defun deino--construct-rdn+ (keys) (deino--construct-name+ keys #'deino--construct-rdn))
+
+(defun deino--nested-rename (key constructor args)
+  (let* ((keys (split-string key " ")))
+    (eval `(defdeino+
+      ,(intern (funcall constructor (butlast keys)))
+      nil
+      (,(cadr keys) ,(intern (concat (funcall constructor keys) "/body")) ,@args)))))
 
 ;;;###autoload
-(defmacro defdeinor+ (key name)
-  (let* ((keys (split-string key " ")))
-    `(defdeino+
-      ,(intern (deino--construct-rdn+ (butlast keys)))
-      nil
-      (,(cadr keys) ,(intern (concat (deino--construct-rdn+ keys) "/body")) ,name))))
+(defun defdeinor+ (key &rest args) (deino--nested-rename key #'deino--construct-rdn+ args))
 
 (defun deino--prop (name prop-name)
   (symbol-value (intern (concat (symbol-name name) prop-name))))
