@@ -1586,7 +1586,7 @@ Arguments are same as of `defdeino'."
                               (concat parent " " (deino--replace-key carkeys))
                               (deino--replace-key carkeys)))
           (current-name (if one-key name (funcall name-constructor current-parent)))
-          (current-body (if one-key func (intern (concat current-name "/body"))))
+          (current-body (if one-key func (meq/inconcat current-name "/body")))
           (current-body-plus (unless one-key (fboundp current-body)))
           (next-parent (concat current-parent " " (deino--replace-key spare-keys)))
           (next-name (if two-key name (s-chop-suffix "-" (funcall name-constructor next-parent))))
@@ -1608,20 +1608,20 @@ Arguments are same as of `defdeino'."
         (string= prop "Doesn't Exist!")) (error "Sorry! The value %s doesn't exist in the dataset!" key) prop)))
 
 (defmacro deino--defdeinos (parent plus onname first-call name body ryo-key &optional docstring &rest heads)
-  (let* ((deino-funk (intern (concat "deino--defdeino" (if plus "+" ""))))
+  (let* ((deino-funk (meq/inconcat "deino--defdeino" (if plus "+" "")))
           (nname (symbol-name name))
-          (func `(defun ,(intern (concat nname "/body")) nil (interactive)
+          (func `(defun ,(meq/inconcat nname "/body") nil (interactive)
                   (if (not deino-enabled-temporarily)
-                    (,(intern (concat nname "-usually/body")))
+                    (,(meq/inconcat nname "-usually/body"))
                     (setq deino-enabled-temporarily nil)
-                    (,(intern (concat nname "-temporarily/body")))))))
+                    (,(meq/inconcat nname "-temporarily/body"))))))
     (eval `(,deino-funk
-      ,(intern (concat nname "-usually"))
+      ,(meq/inconcat nname "-usually")
       ,body
       ,(deino--remove-color-of-deino docstring)
       ,@(mapcar #'deino--remove-color-of-deino heads)))
     (eval `(,deino-funk
-      ,(intern (concat nname "-temporarily"))
+      ,(meq/inconcat nname "-temporarily")
       ,body
       ,(deino--remove-color-of-head docstring)
       ,@(mapcar #'deino--remove-color-of-head heads)))
@@ -1639,7 +1639,7 @@ Arguments are same as of `defdeino'."
               ;; VERY IMPORTANT! THIS IS THE STOP SCENARIO!
               (next-key (unless (d--g ds :two-key) (string-join (cdr (d--g ds :keys)) " ")))
 
-              (next-deino-body (intern (concat (d--g ds :next-name) "/body"))))
+              (next-deino-body (meq/inconcat (d--g ds :next-name) "/body")))
           (unless (d--g ds :one-key)
             (eval `(deino--defdeinos
               ,(d--g ds :current-parent)
@@ -1675,13 +1675,12 @@ Arguments are same as of `defdeino'."
     (eval `(defdeino+
       ,(intern (funcall constructor (butlast keys)))
       nil
-      (,(cadr keys) ,(intern (concat (funcall constructor keys) "/body")) ,@args)))))
+      (,(cadr keys) ,(meq/inconcat (funcall constructor keys) "/body") ,@args)))))
 
 ;;;###autoload
 (defun defdeinor+ (key &rest args) (deino--nested-rename key #'deino--construct-rdn+ args))
 
-(defun deino--prop (name prop-name)
-  (symbol-value (intern (concat (symbol-name name) prop-name))))
+(defun deino--prop (name prop-name) (symbol-value (meq/inconcat (symbol-name name) prop-name)))
 
 (defmacro defdeinodio (name _body &rest heads)
   "Create radios with prefix NAME.
