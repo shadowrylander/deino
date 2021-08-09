@@ -1582,13 +1582,13 @@ Arguments are same as of `defdeino'."
           (two-key (= (length keys) 2))
           (carkeys (car keys))
           (spare-keys (cadr keys))
-          (current-parent (if parent
+          (current-parent (string-trim (if parent
                               (concat parent " " (deino--replace-key carkeys))
-                              (deino--replace-key carkeys)))
+                              (deino--replace-key carkeys))))
           (current-name (if one-key name (funcall name-constructor current-parent)))
           (current-body (if one-key func (meq/inconcat current-name "/body")))
           (current-body-plus (unless one-key (fboundp current-body)))
-          (next-parent (concat current-parent " " (deino--replace-key spare-keys)))
+          (next-parent (string-trim (concat current-parent " " (deino--replace-key spare-keys))))
           (next-name (if two-key name (s-chop-suffix "-" (funcall name-constructor next-parent))))
           (dataset `(:keys ,keys
                       :one-key ,one-key
