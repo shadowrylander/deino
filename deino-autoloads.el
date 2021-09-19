@@ -47,27 +47,6 @@
 
 ;;;***
 
-;;;### (autoloads nil "naked" "naked.el" (0 0 0 0))
-;;; Generated autoloads from naked.el
-
-(autoload 'naked-read-kbd-macro "naked" "\
-Read the region as a keyboard macro definition.
-Like `read-kbd-macro', but does not use angle brackets, by default.
-
-With a prefix arg use angle brackets, exactly like `read-kbd-macro'.
-That is, with non-nil arg ANGLES, expect key descriptions to use angle
-brackets (<...>).  Otherwise, expect key descriptions not to use angle
-brackets.  For example:
-
- (naked-read-kbd-macro  \"mode-line\"  t)   returns [mode-line]
- (naked-read-kbd-macro \"<mode-line>\" t t) returns [mode-line]
-
-\(fn START &optional END ANGLES)" t nil)
-
-(register-definition-prefixes "naked" '("naked"))
-
-;;;***
-
 ;;;### (autoloads nil nil ("deino-test.el") (0 0 0 0))
 
 ;;;***
