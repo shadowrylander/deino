@@ -42,7 +42,7 @@
   (visible-only "When non-nil, export visible only")
   (force-publishing "Toggle force publishing"))
 
-(defdeino deino-ox-html (:color blue)
+(defdeino deino-ox-html (:color blue) nil
   "ox-html"
   ("H" (org-html-export-as-html
         deino-ox/async-export
@@ -64,7 +64,7 @@
   ("b" deino-ox/body "back")
   ("q" nil "quit"))
 
-(defdeino deino-ox-latex (:color blue)
+(defdeino deino-ox-latex (:color blue) nil
   "ox-latex"
   ("L" org-latex-export-as-latex "As LaTeX buffer")
   ("l" org-latex-export-to-latex "As LaTeX file")
@@ -73,7 +73,7 @@
   ("b" deino-ox/body "back")
   ("q" nil "quit"))
 
-(defdeino deino-ox-text (:color blue)
+(defdeino deino-ox-text (:color blue) nil
   "ox-text"
   ("A" (org-ascii-export-as-ascii
         nil nil nil nil
@@ -103,7 +103,7 @@
   ("b" deino-ox/body "back")
   ("q" nil "quit"))
 
-(defdeino deino-ox ()
+(defdeino deino-ox nil nil
   "
 _C-b_ Body only:    % -15`deino-ox/body-only^^^ _C-v_ Visible only:     %`deino-ox/visible-only
 _C-s_ Export scope: % -15`deino-ox/export-scope _C-f_ Force publishing: %`deino-ox/force-publishing

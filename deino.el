@@ -1520,7 +1520,8 @@ result of `defdeino'."
                name body doc '(nil body)
                keymap-name
                (or body-body-pre body-pre) body-before-exit
-               '(setq prefix-arg current-prefix-arg)))))
+               '(setq prefix-arg current-prefix-arg)))
+               ))
     (error
      (deino--complain "Error in defdeino %S: %s" name (cdr err))
      nil)))
@@ -1591,16 +1592,16 @@ Arguments are same as of `defdeino'."
           (next-parent (string-trim (concat current-parent " " (deino--replace-key spare-keys))))
           (next-name (if two-key name (s-chop-suffix "-" (funcall name-constructor next-parent))))
           (dataset `(:keys ,keys
-                      :one-key ,one-key
-                      :two-key ,two-key
-                      :carkeys ,carkeys
-                      :spare-keys ,spare-keys
-                      :current-parent ,current-parent
-                      :current-name ,current-name
-                      :current-body ,current-body
-                      :current-body-plus ,current-body-plus
-                      :next-parent ,next-parent
-                      :next-name ,next-name)))
+                     :one-key ,one-key
+                     :two-key ,two-key
+                     :carkeys ,carkeys
+                     :spare-keys ,spare-keys
+                     :current-parent ,current-parent
+                     :current-name ,current-name
+                     :current-body ,current-body
+                     :current-body-plus ,current-body-plus
+                     :next-parent ,next-parent
+                     :next-name ,next-name)))
     dataset))
 (defun d--g (ds key) (let* ((prop (cl-getf ds key "Doesn't Exist!")))
   (if (and
@@ -1627,12 +1628,13 @@ Arguments are same as of `defdeino'."
       ,(deino--remove-color-of-head docstring)
       ,@(mapcar #'deino--remove-color-of-head heads)))
     (when ryo-key
-      (let* ((rest-of-ryo-key (unless (stringp ryo-key) (cdr ryo-key)))
+      (let* ((string-key (stringp ryo-key))
+              (rest-of-ryo-key (unless string-key (cdr ryo-key)))
               (nonname (if first-call nname onname))
 
               (ds (deino--create-dataset
                     nonname
-                    (if (stringp ryo-key) ryo-key (car ryo-key))
+                    (if string-key ryo-key (car ryo-key))
                     parent
                     (eval func)
                     #'deino--construct-rdn))
@@ -1652,12 +1654,12 @@ Arguments are same as of `defdeino'."
               ,next-key
               ("`" nil "cancel")
               (,(d--g ds :spare-keys) ,next-deino-body ,(d--g ds :next-name)))))
-          (when first-call (with-eval-after-load 'ryo-modal
+          (when (and first-call (featurep 'ryo-modal))
             (eval `(ryo-modal-key
               ,(d--g ds :carkeys)
               ',(d--g ds :current-body)
               :name ,(d--g ds :current-name)
-              ,@rest-of-ryo-key))))))
+              ,@rest-of-ryo-key)))))
     func))
 
 ;;;###autoload

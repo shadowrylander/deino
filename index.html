@@ -1,0 +1,794 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-10-27 Thu 05:17 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="author" content="Jeet Ray" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://combinatronics.io/sylvorg/settings/main/src/styles/primary/syvl.css" />
+<link rel="icon" href="https://combinatronics.io/sylvorg/settings/main/src/icons/favicons/shiny-zigzagoon-galar.ico" sizes="any" />
+<link rel="icon" href="https://combinatronics.io/sylvorg/settings/main/src/icons/favicons/shiny-zigzagoon-galar.svg" />
+<link rel="manifest" href="https://combinatronics.io/sylvorg/settings/main/manifest.json" />
+<link rel="stylesheet" type="text/css" href="https://combinatronics.io/sylvorg/settings/main/src/styles/highlight/paraiso-dark.min.css" />
+<script src="https://combinatronics.io/sylvorg/settings/main/src/scripts/highlight/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+<div class="header">
+<h1>We Are Syvlorg.</h1>
+<a href="">About Me</a>
+<a href="">About This Website</a>
+<a href="">About Syvlorg</a>
+<a href="https://resume.syvl.org">Résumé</a>
+<a href="https://index.syvl.org">Index</a>
+</div>
+</head>
+<body>
+<div id="content" class="content">
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#deino">deino</a>
+<ul>
+<li><a href="#description-for-poets">Description for Poets</a></li>
+<li><a href="#description-for-pragmatics">Description for Pragmatics</a></li>
+</ul>
+</li>
+<li><a href="#sample-deinos">Sample deinos</a>
+<ul>
+<li><a href="#the-one-with-the-least-amount-of-code">The one with the least amount of code</a></li>
+<li><a href="#the-impressive-looking-one">The impressive-looking one</a></li>
+</ul>
+</li>
+<li><a href="#community-wiki">Community wiki</a></li>
+<li><a href="#the-rules-of-deino-tics">The Rules of deino-tics</a>
+<ul>
+<li><a href="#deino-awesome"><code>deino-awesome</code></a></li>
+<li><a href="#awesome-map-and-awesome-binding"><code>awesome-map</code> and <code>awesome-binding</code></a></li>
+<li><a href="#awesome-plist"><code>awesome-plist</code></a>
+<ul>
+<li><a href="#pre-and-post"><code>:pre</code> and <code>:post</code></a></li>
+<li><a href="#exit"><code>:exit</code></a></li>
+<li><a href="#foreign-keys"><code>:foreign-keys</code></a></li>
+<li><a href="#color"><code>:color</code></a></li>
+<li><a href="#timeout"><code>:timeout</code></a></li>
+<li><a href="#hint"><code>:hint</code></a></li>
+<li><a href="#bind"><code>:bind</code></a></li>
+<li><a href="#base-map"><code>:base-map</code></a></li>
+</ul>
+</li>
+<li><a href="#awesome-docstring"><code>awesome-docstring</code></a></li>
+<li><a href="#awesome-head-1"><code>awesome-head-1</code></a>
+<ul>
+<li><a href="#head-binding"><code>head-binding</code></a></li>
+<li><a href="#head-command"><code>head-command</code></a></li>
+<li><a href="#head-hint"><code>head-hint</code></a></li>
+<li><a href="#head-plist"><code>head-plist</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-deino" class="outline-2">
+<h2 id="deino">deino</h2>
+<div class="outline-text-2" id="text-deino">
+<p>
+<a href="https://travis-ci.org/abo-abo/deino">[[https://travis-ci.org/abo-abo/deino.svg?branch=master</a>]]
+<a href="https://melpa.org/#/deino">[[https://melpa.org/packages/deino-badge.svg</a>]]
+<a href="https://stable.melpa.org/#/deino">[[https://stable.melpa.org/packages/deino-badge.svg</a>]]
+</p>
+
+<p>
+This is a package for GNU Emacs that can be used to tie related commands
+into a family of short bindings with a common prefix - a deino.
+</p>
+
+
+<div id="org70c4606" class="figure">
+<p><img src="http://oremacs.com/download/deino.jpg" alt="deino.jpg" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-description-for-poets" class="outline-3">
+<h3 id="description-for-poets">Description for Poets</h3>
+<div class="outline-text-3" id="text-description-for-poets">
+<p>
+Once you summon the deino through the prefixed binding (the body + any
+one head), all heads can be called in succession with only a short
+extension.
+</p>
+
+<p>
+The deino is vanquished once cosmoem, any binding that isn't the deino's
+head, arrives. Note that cosmoem, besides vanquishing the deino, will
+still serve his original purpose, calling his proper command. This makes
+the deino very seamless, it's like a minor mode that disables itself
+auto-magically.
+</p>
+</div>
+</div>
+
+<div id="outline-container-description-for-pragmatics" class="outline-3">
+<h3 id="description-for-pragmatics">Description for Pragmatics</h3>
+<div class="outline-text-3" id="text-description-for-pragmatics">
+<p>
+Imagine that you have bound C-c j and C-c k in your config. You want to
+call C-c j and C-c k in some (arbitrary) sequence. deino allows you to:
+</p>
+
+<ul class="org-ul">
+<li>Bind your functions in a way that pressing C-c jjkk3j5k is equivalent
+to pressing C-c j C-c j C-c k C-c k M-3 C-c j M-5 C-c k. Any key other
+than j or k exits this state.</li>
+
+<li>Assign a custom hint to this group of functions, so that you know
+immediately after pressing C-c that you can follow up with j or k.</li>
+</ul>
+
+<p>
+If you want to quickly understand the concept, see
+<a href="https://www.youtube.com/watch?v=_qZliI1BKzI">the video demo</a>.
+</p>
+
+<div class="html" id="orgd072967">
+<p>
+&lt;!&#x2013; markdown-toc start - Don't edit this section. Run M-x markdown-toc/generate-toc again &#x2013;&gt;
+</p>
+
+</div>
+
+<p>
+<b>Table of Contents</b>
+</p>
+
+<ul class="org-ul">
+<li><a href="#sample-deinos">Sample deinos</a>
+
+<ul class="org-ul">
+<li><a href="#the-one-with-the-least-amount-of-code">The one with the least
+amount of code</a></li>
+<li><a href="#the-impressive-looking-one">The impressive-looking one</a></li>
+</ul></li>
+
+<li><a href="#community-wiki">Community wiki</a></li>
+<li><a href="#the-rules-of-deino-tics">The Rules of deino-tics</a>
+
+<ul class="org-ul">
+<li><a href="#deino-awesome"><code>deino-awesome</code></a></li>
+<li><a href="#awesome-map-and-awesome-binding"><code>awesome-map</code> and
+<code>awesome-binding</code></a></li>
+<li><a href="#awesome-plist"><code>awesome-plist</code></a>
+
+<ul class="org-ul">
+<li><a href="#pre-and-post"><code>:pre</code> and <code>:post</code></a></li>
+<li><a href="#exit"><code>:exit</code></a></li>
+<li><a href="#foreign-keys"><code>:foreign-keys</code></a></li>
+<li><a href="#color"><code>:color</code></a></li>
+<li><a href="#timeout"><code>:timeout</code></a></li>
+<li><a href="#hint"><code>:hint</code></a></li>
+<li><a href="#bind"><code>:bind</code></a></li>
+</ul></li>
+
+<li><a href="#awesome-docstring"><code>awesome-docstring</code></a></li>
+<li><a href="#awesome-head-1"><code>awesome-head-1</code></a>
+
+<ul class="org-ul">
+<li><a href="#head-binding"><code>head-binding</code></a></li>
+<li><a href="#head-command"><code>head-command</code></a></li>
+<li><a href="#head-hint"><code>head-hint</code></a></li>
+<li><a href="#head-plist"><code>head-plist</code></a></li>
+</ul></li>
+</ul></li>
+</ul>
+
+<div class="html" id="org490e83a">
+<p>
+&lt;!&#x2013; markdown-toc end &#x2013;&gt;
+</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sample-deinos" class="outline-2">
+<h2 id="sample-deinos">Sample deinos</h2>
+<div class="outline-text-2" id="text-sample-deinos">
+</div>
+<div id="outline-container-the-one-with-the-least-amount-of-code" class="outline-3">
+<h3 id="the-one-with-the-least-amount-of-code">The one with the least amount of code</h3>
+<div class="outline-text-3" id="text-the-one-with-the-least-amount-of-code">
+<pre class="example" id="org647e057">
+  (defdeino deino-zoom (global-map "&lt;f2&gt;")
+    "zoom"
+    ("g" text-scale-increase "in")
+    ("l" text-scale-decrease "out"))
+</pre>
+
+<p>
+With this simple code, you can:
+</p>
+
+<ul class="org-ul">
+<li>Start zooming in with &lt;f2&gt; g.</li>
+<li>Continue to zoom in with g.</li>
+<li>Or zoom out with l.</li>
+<li>Zoom in five times at once with 5g.</li>
+<li>Stop zooming with <i>any</i> key that isn't g or l.</li>
+</ul>
+
+<p>
+For any deino:
+</p>
+
+<ul class="org-ul">
+<li><code>digit-argument</code> can be called with 0-9.</li>
+<li><code>negative-argument</code> can be called with -.</li>
+<li><code>universal-argument</code> can be called with C-u.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-the-impressive-looking-one" class="outline-3">
+<h3 id="the-impressive-looking-one">The impressive-looking one</h3>
+<div class="outline-text-3" id="text-the-impressive-looking-one">
+<p>
+Here's the result of pressing . in the good-old Buffer menu:
+</p>
+
+
+<div id="org5c8e88f" class="figure">
+<p><img src="http://oremacs.com/download/deino-buffer-menu.png" alt="deino-buffer-menu.png" />
+</p>
+</div>
+
+<p>
+The code is large but very simple:
+</p>
+
+<pre class="example" id="orga51e7d3">
+  (defdeino deino-buffer-menu (:color pink
+                               :hint nil)
+    "
+  ^Mark^             ^Unmark^           ^Actions^          ^Search
+  ^^^^^^^^-----------------------------------------------------------------
+  _m_: mark          _u_: unmark        _x_: execute       _R_: re-isearch
+  _s_: save          _U_: unmark up     _b_: bury          _I_: isearch
+  _d_: delete        ^ ^                _g_: refresh       _O_: multi-occur
+  _D_: delete up     ^ ^                _T_: files only: % -28`Buffer-menu-files-only
+  _~_: modified
+  "
+    ("m" Buffer-menu-mark)
+    ("u" Buffer-menu-unmark)
+    ("U" Buffer-menu-backup-unmark)
+    ("d" Buffer-menu-delete)
+    ("D" Buffer-menu-delete-backwards)
+    ("s" Buffer-menu-save)
+    ("~" Buffer-menu-not-modified)
+    ("x" Buffer-menu-execute)
+    ("b" Buffer-menu-bury)
+    ("g" revert-buffer)
+    ("T" Buffer-menu-toggle-files-only)
+    ("O" Buffer-menu-multi-occur :color blue)
+    ("I" Buffer-menu-isearch-buffers :color blue)
+    ("R" Buffer-menu-isearch-buffers-regexp :color blue)
+    ("c" nil "cancel")
+    ("v" Buffer-menu-select "select" :color blue)
+    ("o" Buffer-menu-other-window "other-window" :color blue)
+    ("q" quit-window "quit" :color blue))
+
+  (define-key Buffer-menu-mode-map "." 'deino-buffer-menu/body)
+</pre>
+
+<p>
+Looking at the code, you can see <code>deino-buffer-menu</code> as sort of a
+namespace construct that wraps each function that it's given in code
+that shows that hint and makes it easy to call the related functions.
+One additional function is created and returned as the result of
+<code>defdeino</code> - <code>deino-buffer-menu/body</code>. This function does nothing except
+setting up the hint and the keymap, and is usually the entry point to
+complex deinos.
+</p>
+
+<p>
+To write your own deinos, you can:
+</p>
+
+<ul class="org-ul">
+<li>Either modify an existing deino to do what you want to do.</li>
+<li>Or read <a href="#the-rules-of-deino-tics">the rules</a>,
+<a href="https://github.com/abo-abo/deino/blob/master/deino-examples.el">the
+examples</a>, the docstrings and comments in the source.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-community-wiki" class="outline-2">
+<h2 id="community-wiki">Community wiki</h2>
+<div class="outline-text-2" id="text-community-wiki">
+<p>
+You can find some user created deinos and more documentation in the
+project's <a href="https://github.com/abo-abo/deino/wiki/">community wiki</a>.
+Feel free to add your own or edit the existing ones.
+</p>
+</div>
+</div>
+
+<div id="outline-container-the-rules-of-deino-tics" class="outline-2">
+<h2 id="the-rules-of-deino-tics">The Rules of deino-tics</h2>
+<div class="outline-text-2" id="text-the-rules-of-deino-tics">
+<p>
+Each deino (take <code>awesome</code> as a prefix to make it more specific) looks
+like this:
+</p>
+
+<pre class="example" id="org7f22e56">
+  (defdeino deino-awesome (awesome-map awesome-binding awesome-plist)
+    awesome-docstring
+    awesome-head-1
+    awesome-head-2
+    awesome-head-3
+    ...)
+</pre>
+</div>
+
+<div id="outline-container-deino-awesome" class="outline-3">
+<h3 id="deino-awesome"><code>deino-awesome</code></h3>
+<div class="outline-text-3" id="text-deino-awesome">
+<p>
+Each deino needs a name, and this one is named <code>deino-awesome</code>. You can
+name your deinos as you wish, but I prefer to start each one with
+<code>deino-</code>, because it acts as an additional namespace layer, for example:
+<code>deino-zoom</code>, <code>deino-helm</code>, <code>deino-apropos</code> etc.
+</p>
+
+<p>
+If you name your deino <code>deino-awesome</code>, the return result of <code>defdeino</code>
+will be <code>deino-awesome/body</code>.
+</p>
+
+<p>
+Here's what <code>deino-zoom/body</code> looks like, if you're interested:
+</p>
+
+<pre class="example" id="org06b8b40">
+  (defun deino-zoom/body ()
+    "Call the body in the \"deino-zoom\" deino.
+
+  The heads for the associated deino are:
+
+  \"g\":    `text-scale-increase',
+  \"l\":    `text-scale-decrease'
+
+  The body can be accessed via `deino-zoom/body', which is bound to \"&lt;f2&gt;\"."
+    (interactive)
+    (require 'deino)
+    (deino-default-pre)
+    (let ((deino--ignore nil))
+      (deino-keyboard-quit)
+      (setq deino-curr-body-fn
+            'deino-zoom/body))
+    (deino-show-hint
+     deino-zoom/hint
+     'deino-zoom)
+    (deino-set-transient-map
+     deino-zoom/keymap
+     (lambda nil
+       (deino-keyboard-quit)
+       nil)
+     nil)
+    (setq prefix-arg
+          current-prefix-arg))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-awesome-map-and-awesome-binding" class="outline-3">
+<h3 id="awesome-map-and-awesome-binding"><code>awesome-map</code> and <code>awesome-binding</code></h3>
+<div class="outline-text-3" id="text-awesome-map-and-awesome-binding">
+<p>
+This can be any keymap, for instance, <code>global-map</code> or
+<code>isearch-mode-map</code>.
+</p>
+
+<p>
+For this example:
+</p>
+
+<pre class="example" id="org1079c5c">
+  (defdeino deino-zoom (global-map "&lt;f2&gt;")
+    "zoom"
+    ("g" text-scale-increase "in")
+    ("l" text-scale-decrease "out"))
+</pre>
+
+<ul class="org-ul">
+<li><code>awesome-map</code> is <code>global-map</code></li>
+<li><code>awesome-binding</code> is <code>"&lt;f2&gt;"</code></li>
+</ul>
+
+<p>
+And here's the relevant generated code:
+</p>
+
+<pre class="example" id="orga41d076">
+  (unless (keymapp (lookup-key global-map (kbd "&lt;f2&gt;")))
+    (define-key global-map (kbd "&lt;f2&gt;") nil))
+  (define-key global-map [f2 103]
+    (function deino-zoom/text-scale-increase))
+  (define-key global-map [f2 108]
+    (function deino-zoom/text-scale-decrease))
+</pre>
+
+<p>
+As you see, <code>"&lt;f2&gt;"</code> is used as a prefix for g (char value 103) and l
+(char value 108).
+</p>
+
+<p>
+If you don't want to use a map right now, you can skip it like this:
+</p>
+
+<pre class="example" id="org28163f9">
+  (defdeino deino-zoom (nil nil)
+    "zoom"
+    ("g" text-scale-increase "in")
+    ("l" text-scale-decrease "out"))
+</pre>
+
+<p>
+Or even simpler:
+</p>
+
+<pre class="example" id="org9eba0b8">
+  (defdeino deino-zoom ()
+    "zoom"
+    ("g" text-scale-increase "in")
+    ("l" text-scale-decrease "out"))
+</pre>
+
+<p>
+But then you would have to bind <code>deino-zoom/text-scale-increase</code> and
+<code>deino-zoom/text-scale-decrease</code> yourself.
+</p>
+</div>
+</div>
+
+<div id="outline-container-awesome-plist" class="outline-3">
+<h3 id="awesome-plist"><code>awesome-plist</code></h3>
+<div class="outline-text-3" id="text-awesome-plist">
+<p>
+You can read up on what a plist is in
+<a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Property-Lists.html">the
+Elisp manual</a>.
+</p>
+
+<p>
+You can use <code>awesome-plist</code> to modify the behavior of each head in some
+way. Below is a list of each key.
+</p>
+</div>
+
+<div id="outline-container-pre-and-post" class="outline-4">
+<h4 id="pre-and-post"><code>:pre</code> and <code>:post</code></h4>
+<div class="outline-text-4" id="text-pre-and-post">
+<p>
+You can specify code that will be called before each head, and after the
+body. For example:
+</p>
+
+<pre class="example" id="org8370b48">
+  (defdeino deino-vi (:pre (set-cursor-color "#40e0d0")
+                      :post (progn
+                              (set-cursor-color "#ffffff")
+                              (message
+                               "Thank you, come again.")))
+    "vi"
+    ("l" forward-char)
+    ("h" backward-char)
+    ("j" next-line)
+    ("k" previous-line)
+    ("q" nil "quit"))
+</pre>
+
+<p>
+Thanks to <code>:pre</code>, each time any head is called, the cursor color is
+changed. And when the deino quits, the cursor color will be made black
+again with <code>:post</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-exit" class="outline-4">
+<h4 id="exit"><code>:exit</code></h4>
+<div class="outline-text-4" id="text-exit">
+<p>
+The <code>:exit</code> key is inherited by every head (they can override it) and
+influences what will happen after executing head's command:
+</p>
+
+<ul class="org-ul">
+<li><code>:exit nil</code> (the default) means that the deino state will continue -
+you'll still see the hint and be able to use short bindings.</li>
+<li><code>:exit t</code> means that the deino state will stop.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-foreign-keys" class="outline-4">
+<h4 id="foreign-keys"><code>:foreign-keys</code></h4>
+<div class="outline-text-4" id="text-foreign-keys">
+<p>
+The <code>:foreign-keys</code> key belongs to the body and decides what to do when
+a key is pressed that doesn't belong to any head:
+</p>
+
+<ul class="org-ul">
+<li><code>:foreign-keys nil</code> (the default) means that the deino state will stop
+and the foreign key will do whatever it was supposed to do if there
+was no deino state.</li>
+<li><code>:foreign-keys warn</code> will not stop the deino state, but instead will
+issue a warning without running the foreign key.</li>
+<li><code>:foreign-keys run</code> will not stop the deino state, and try to run the
+foreign key.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-color" class="outline-4">
+<h4 id="color"><code>:color</code></h4>
+<div class="outline-text-4" id="text-color">
+<p>
+The <code>:color</code> key is a shortcut. It aggregates <code>:exit</code> and
+<code>:foreign-keys</code> key in the following way:
+</p>
+
+<pre class="example" id="org5d6d429">
+  | color    | toggle                     |
+  |----------+----------------------------|
+  | red      |                            |
+  | blue     | :exit t                    |
+  | amaranth | :foreign-keys warn         |
+  | teal     | :foreign-keys warn :exit t |
+  | pink     | :foreign-keys run          |
+</pre>
+
+<p>
+It's also a trick to make you instantly aware of the current deino keys
+that you're about to press: the keys will be highlighted with the
+appropriate color.
+</p>
+</div>
+</div>
+
+<div id="outline-container-timeout" class="outline-4">
+<h4 id="timeout"><code>:timeout</code></h4>
+<div class="outline-text-4" id="text-timeout">
+<p>
+The <code>:timeout</code> key starts a timer for the corresponding amount of
+seconds that disables the deino. Calling any head will refresh the
+timer.
+</p>
+</div>
+</div>
+
+<div id="outline-container-hint" class="outline-4">
+<h4 id="hint"><code>:hint</code></h4>
+<div class="outline-text-4" id="text-hint">
+<p>
+The <code>:hint</code> key will be inherited by each head. Each head is allowed to
+override it, of course. One value that makes sense is <code>:hint nil</code>. See
+below for an explanation of head hint.
+</p>
+</div>
+</div>
+
+<div id="outline-container-bind" class="outline-4">
+<h4 id="bind"><code>:bind</code></h4>
+<div class="outline-text-4" id="text-bind">
+<p>
+The <code>:bind</code> key provides a lambda to be used to bind each head. This is
+quite advanced and rarely used, you're not likely to need it. But if you
+would like to bind your heads with e.g. <code>bind-key</code> instead of
+<code>define-key</code> you can use this option.
+</p>
+
+<p>
+The <code>:bind</code> key can be overridden by each head. This is useful if you
+want to have a few heads that are not bound outside the deino.
+</p>
+</div>
+</div>
+
+<div id="outline-container-base-map" class="outline-4">
+<h4 id="base-map"><code>:base-map</code></h4>
+<div class="outline-text-4" id="text-base-map">
+<p>
+Use this option if you want to override <code>deino-base-map</code> for the current
+deino.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-awesome-docstring" class="outline-3">
+<h3 id="awesome-docstring"><code>awesome-docstring</code></h3>
+<div class="outline-text-3" id="text-awesome-docstring">
+<p>
+This can be a simple string used to build the final deino hint. However,
+if you start it with a newline, the key-highlighting and Ruby-style
+string interpolation becomes enabled, as you can see in
+<code>deino-buffer-menu</code> above.
+</p>
+
+<p>
+To highlight a key, just wrap it in underscores. Note that the key must
+belong to one of the heads. The key will be highlighted with the color
+that is appropriate to the behavior of the key, i.e. if the key will
+make the deino exit, the color will be blue.
+</p>
+
+<p>
+To insert an empty character, use <code>^</code>. The only use of this is to have
+your code aligned as nicely as the result.
+</p>
+
+<p>
+To insert a dynamic Elisp variable, use =%=` followed by the variable.
+Each time the variable changes due to a head, the docstring will be
+updated. <code>format</code>-style width specifiers can be used.
+</p>
+
+<p>
+To insert a dynamic Elisp expression, use e.g.
+<code>%(length (dired-get-marked-files))</code>. If a head will change the amount
+of marked files, for example, it will be appropriately updated.
+</p>
+
+<p>
+If the result of the Elisp expression is a string and you don't want to
+quote it, use this form: <code>%s(shell-command-to-string "du -hs")</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-awesome-head-1" class="outline-3">
+<h3 id="awesome-head-1"><code>awesome-head-1</code></h3>
+<div class="outline-text-3" id="text-awesome-head-1">
+<p>
+Each head looks like this:
+</p>
+
+<pre class="example" id="orgaa9e012">
+  (head-binding head-command head-hint head-plist)
+</pre>
+
+<p>
+For the head <code>("g" text-scale-increase "in")</code>:
+</p>
+
+<ul class="org-ul">
+<li><code>head-binding</code> is <code>"g"</code>.</li>
+<li><code>head-command</code> is <code>text-scale-increase</code>.</li>
+<li><code>head-hint</code> is <code>"in"</code>.</li>
+<li><code>head-plist</code> is <code>nil</code>.</li>
+</ul>
+</div>
+
+<div id="outline-container-head-binding" class="outline-4">
+<h4 id="head-binding"><code>head-binding</code></h4>
+<div class="outline-text-4" id="text-head-binding">
+<p>
+The <code>head-binding</code> is a string that can be passed to <code>kbd</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-head-command" class="outline-4">
+<h4 id="head-command"><code>head-command</code></h4>
+<div class="outline-text-4" id="text-head-command">
+<p>
+The <code>head-command</code> can be:
+</p>
+
+<ul class="org-ul">
+<li>command name, like <code>text-scale-increase</code>.</li>
+
+<li><p>
+a lambda, like
+</p>
+
+<pre class="example" id="org27658af">
+      ("g" (lambda ()
+             (interactive)
+             (let ((current-prefix-arg 4))
+               (call-interactively #'magit-status)))
+           "git")
+</pre></li>
+
+<li>nil, which exits the deino.</li>
+
+<li>a single sexp, which will be wrapped in an interactive lambda.</li>
+</ul>
+
+<p>
+Here's an example of the last option:
+</p>
+
+<pre class="example" id="org6855acb">
+  (defdeino deino-launcher (:color blue)
+     "Launch"
+     ("h" man "man")
+     ("r" (browse-url "http://www.reddit.com/r/emacs/") "reddit")
+     ("w" (browse-url "http://www.emacswiki.org/") "emacswiki")
+     ("s" shell "shell")
+     ("q" nil "cancel"))
+  (global-set-key (kbd "C-c r") 'deino-launcher/body)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-head-hint" class="outline-4">
+<h4 id="head-hint"><code>head-hint</code></h4>
+<div class="outline-text-4" id="text-head-hint">
+<p>
+In case of a large body docstring, you usually don't want the head hint
+to show up, since you've already documented it in the body docstring.
+You can set the head hint to <code>nil</code> to do this.
+</p>
+
+<p>
+Example:
+</p>
+
+<pre class="example" id="org83a609e">
+  (defdeino deino-zoom (global-map "&lt;f2&gt;")
+    "
+  Press _g_ to zoom in.
+  "
+    ("g" text-scale-increase nil)
+    ("l" text-scale-decrease "out"))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-head-plist" class="outline-4">
+<h4 id="head-plist"><code>head-plist</code></h4>
+<div class="outline-text-4" id="text-head-plist">
+<p>
+Here's a list of body keys that can be overridden in each head:
+</p>
+
+<ul class="org-ul">
+<li><code>:exit</code></li>
+<li><code>:color</code></li>
+<li><code>:bind</code></li>
+<li><code>:column</code></li>
+</ul>
+
+<p>
+Use <code>:column</code> feature to have an aligned rectangular docstring without
+defining it manually. See
+<a href="https://github.com/abo-abo/deino/blob/05871dd6c8af7b2268bd1a10eb9f8a3e423209cd/deino-examples.el#L337">deino-examples.el</a>
+for an example code.
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Jeet Ray</p>
+<p class="date">Created: 2022-10-27 Thu 05:17</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
