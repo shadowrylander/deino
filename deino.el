@@ -1654,12 +1654,12 @@ Arguments are same as of `defdeino'."
               ,next-key
               ("`" nil "cancel")
               (,(d--g ds :spare-keys) ,next-deino-body ,(d--g ds :next-name)))))
-          (when (and first-call (featurep 'ryo-modal))
+          (when first-call (with-eval-after-load 'ryo-modal
             (eval `(ryo-modal-key
               ,(d--g ds :carkeys)
               ',(d--g ds :current-body)
               :name ,(d--g ds :current-name)
-              ,@rest-of-ryo-key)))))
+              ,@rest-of-ryo-key))))))
     func))
 
 ;;;###autoload
@@ -1674,11 +1674,11 @@ Arguments are same as of `defdeino'."
 (defun deino--construct-rdn+ (keys) (deino--construct-name+ keys #'deino--construct-rdn))
 
 (defun deino--nested-rename (key constructor args)
-  (let* ((keys (split-string key " ")))
+  (with-eval-after-load 'ryo-modal (let* ((keys (split-string key " ")))
     (eval `(defdeino+
       ,(intern (funcall constructor (butlast keys)))
       nil
-      (,(cadr keys) ,(meq/inconcat (funcall constructor keys) "/body") ,@args)))))
+      (,(cadr keys) ,(meq/inconcat (funcall constructor keys) "/body") ,@args))))))
 
 ;;;###autoload
 (defun defdeinor+ (key &rest args) (deino--nested-rename key #'deino--construct-rdn+ args))

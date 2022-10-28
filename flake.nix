@@ -25,7 +25,6 @@
         titan.follows = "settings/titan";
         nixpkgs.follows = "settings/nixpkgs";
 
-        epkg-meq.url = github:syvlorg/meq;
         epkg-janus.url = github:syvlorg/janus;
 
         flake-utils.url = github:numtide/flake-utils;
@@ -42,7 +41,7 @@
             inherit pname;
             src = ./.;
             buildInputs = flatten [ emacs propagatedUserEnvPkgs ];
-            propagatedUserEnvPkgs = with emacs.pkgs; flatten [ meq meq.propagatedUserEnvPkgs janus ];
+            propagatedUserEnvPkgs = with emacs.pkgs; flatten [ janus janus.propagatedUserEnvPkgs ];
             meta = {
               inherit (emacs.meta) platforms;
               homepage = "https://github.com/syvlorg/${pname}";
