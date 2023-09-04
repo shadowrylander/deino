@@ -94,7 +94,9 @@
   ("\"" . "quotes")
   ("\\" . "bs")
   ("," . "comma")
-  ("`" . "bts")))
+  ("`" . "bts")
+  ("[" . "lsb")
+  ("]" . "rsb")))
 
 (defvar deino--ryo-deino-alist nil)
 
@@ -1576,9 +1578,14 @@ Arguments are same as of `defdeino'."
 (defun deino--replace-key (key) (or (cdr (assoc key deino--key-replacements)) key))
 (defun deino--replace-spaces (str) (s-replace " " "-" str))
 (defun deino--construct-rdn (str) (deino--replace-spaces (concat "ryo-deino--" str)))
+(defun deino--replace-key-chords (key-chord &optional delimiter)
+  (let* ((kc (if (listp key-chord) key-chord (split-string key-chord delimiter))))
+    (if (meq/key-chord-p kc) `(,(concat (nth 1 kc) (nth 2 kc)) ,@(nthcdr 3 kc)) kc)))
 
-(defun deino--create-dataset (name key parent func name-constructor)
-  (let* ((keys (split-string key " "))
+(defun deino--create-dataset (name key parent func name-constructor &optional delimiter)
+  (let* ((keys (let* ((keys* (if (listp key) key (split-string key delimiter)))
+                      (key-chords (-partition-before-pred #'meq/key-chord-p keys*)))
+                  (-flatten (mapcar #'deino--replace-key-chords key-chords))))
           (one-key (= (length keys) 1))
           (two-key (= (length keys) 2))
           (carkeys (car keys))
@@ -1628,36 +1635,38 @@ Arguments are same as of `defdeino'."
       ,(deino--remove-color-of-head docstring)
       ,@(mapcar #'deino--remove-color-of-head heads)))
     (when ryo-key
-      (let* ((string-key (stringp ryo-key))
-              (rest-of-ryo-key (unless string-key (cdr ryo-key)))
-              (nonname (if first-call nname onname))
+      (with-eval-after-load 'ryo-modal
+        (let* ((string-key (stringp ryo-key))
+                (rest-of-ryo-key (unless string-key (cdr ryo-key)))
+                (nonname (if first-call nname onname))
 
-              (ds (deino--create-dataset
-                    nonname
-                    (if string-key ryo-key (car ryo-key))
-                    parent
-                    (eval func)
-                    #'deino--construct-rdn))
+                (ds (deino--create-dataset
+                      nonname
+                      (if string-key ryo-key (car ryo-key))
+                      parent
+                      (eval func)
+                      #'deino--construct-rdn))
 
-              ;; VERY IMPORTANT! THIS IS THE STOP SCENARIO!
-              (next-key (unless (d--g ds :two-key) (string-join (cdr (d--g ds :keys)) " ")))
+                ;; VERY IMPORTANT! THIS IS THE STOP SCENARIO!
+                (next-key (unless (d--g ds :two-key) (string-join (cdr (d--g ds :keys)) " ")))
 
-              (next-deino-body (meq/inconcat (d--g ds :next-name) "/body")))
-          (unless (d--g ds :one-key)
-            (eval `(deino--defdeinos
-              ,(d--g ds :current-parent)
-              ,(d--g ds :current-body-plus)
-              ,nonname
-              nil
-              ,(intern (d--g ds :current-name))
-              (:color blue)
-              ,next-key
-              ("`" nil "cancel")
-              (,(d--g ds :spare-keys) ,next-deino-body ,(d--g ds :next-name)))))
-          (when first-call (with-eval-after-load 'ryo-modal
-            (eval `(ryo-modal-key
-              ,(d--g ds :carkeys)
-              ',(d--g ds :current-body)
+                (next-deino-body (meq/inconcat (d--g ds :next-name) "/body")))
+            (unless (d--g ds :one-key)
+              (eval `(deino--defdeinos
+                ,(d--g ds :current-parent)
+                ,(d--g ds :current-body-plus)
+                ,nonname
+                nil
+                ,(intern (d--g ds :current-name))
+                (:color blue)
+                ,next-key
+                ("`" nil "cancel")
+                ("DEL" ,(if first-call nil (meq/inconcat (deino--construct-rdn (d--g ds :current-parent)) "/body")) "back")
+                (,(d--g ds :spare-keys) ,next-deino-body ,(d--g ds :next-name)))))
+            (when first-call
+              (eval `(ryo-modal-key
+                ,(d--g ds :carkeys)
+                #',(d--g ds :current-body)
               :name ,(d--g ds :current-name)
               ,@rest-of-ryo-key))))))
     func))
@@ -1670,15 +1679,22 @@ Arguments are same as of `defdeino'."
 (defmacro defdeino+ (name body &optional docstring &rest heads)
   `(deino--defdeinos nil t nil t ,name ,body nil ,docstring ,@heads))
 
-(defun deino--construct-name+ (keys constructor) (funcall constructor (string-join (mapcar #'deino--replace-key keys) " ")))
+(defun deino--replace-keys (keys &optional delimiter) (mapcar #'deino--replace-key (if (listp keys) keys (split-string keys (or delimiter " ")))))
+(defun deino--construct-name+ (keys constructor &optional delimiter) (funcall constructor (string-join (deino--replace-keys keys delimiter) " ")))
 (defun deino--construct-rdn+ (keys) (deino--construct-name+ keys #'deino--construct-rdn))
 
-(defun deino--nested-rename (key constructor args)
-  (with-eval-after-load 'ryo-modal (let* ((keys (split-string key " ")))
+(defun deino--nested-rename (key constructor args &optional delimiter)
+  (add-hook 'window-setup-hook #'(lambda nil (let* ((keys (split-string key (or delimiter " "))))
     (eval `(defdeino+
       ,(intern (funcall constructor (butlast keys)))
       nil
-      (,(cadr keys) ,(meq/inconcat (funcall constructor keys) "/body") ,@args))))))
+      (,(car (last keys)) ,(meq/inconcat (funcall constructor keys) "/body") ,@args)))))))
+
+(defun deino--nested-describe (key constructor description &optional delimiter)
+  (eval `(defdeino+
+      ,(intern (funcall constructor key delimiter))
+      nil
+      ,description)))
 
 ;;;###autoload
 (defun defdeinor+ (key &rest args) (deino--nested-rename key #'deino--construct-rdn+ args))
