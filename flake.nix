@@ -33,7 +33,7 @@
     "Tie related commands into a family of short bindings with a common prefix!";
   inputs = rec {
     bundle = {
-      url = "git+https://github.com/sylvorg/bundle.git";
+      url = "https://github.com/sylvorg/bundle.git";
       type = "git";
       submodules = true;
     };
